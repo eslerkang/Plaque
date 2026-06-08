@@ -11,16 +11,28 @@ export function middleware(request: NextRequest) {
       (c) => c.name.startsWith("sb-") && c.name.includes("-auth-token")
     );
 
+  // Consent cookie — set after accepting ToS + Privacy Policy
+  const hasConsent = request.cookies.has("plaque_terms");
+
   const protectedPaths = ["/scrapbook", "/search", "/settings"];
   const isProtected = protectedPaths.some((p) => pathname.startsWith(p));
 
+  // 1. Unauthenticated → login
   if (!hasSession && isProtected) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
 
-  if (hasSession && pathname === "/login") {
+  // 2. Authenticated but no consent → consent page (only for protected routes)
+  if (hasSession && !hasConsent && isProtected) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/consent";
+    return NextResponse.redirect(url);
+  }
+
+  // 3. Authenticated + consented trying to visit /login → scrapbook
+  if (hasSession && hasConsent && pathname === "/login") {
     const url = request.nextUrl.clone();
     url.pathname = "/scrapbook";
     return NextResponse.redirect(url);
