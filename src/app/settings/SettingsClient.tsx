@@ -162,6 +162,32 @@ export function SettingsClient({ profile, userEmail, artworkCount, galleryCount 
       {/* Divider */}
       <div className="h-px bg-border" />
 
+      {/* Legal */}
+      <section className="space-y-2">
+        <h2 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
+          약관 · 정책
+        </h2>
+        <div className="space-y-1">
+          <Link
+            href="/terms"
+            className="flex items-center justify-between py-2 text-sm hover:text-foreground text-muted-foreground transition-colors"
+          >
+            <span>이용약관</span>
+            <span className="text-xs">→</span>
+          </Link>
+          <Link
+            href="/privacy"
+            className="flex items-center justify-between py-2 text-sm hover:text-foreground text-muted-foreground transition-colors"
+          >
+            <span>개인정보처리방침</span>
+            <span className="text-xs">→</span>
+          </Link>
+        </div>
+      </section>
+
+      {/* Divider */}
+      <div className="h-px bg-border" />
+
       {/* Sign out */}
       <section>
         <Button
