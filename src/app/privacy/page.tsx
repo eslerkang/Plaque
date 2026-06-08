@@ -7,7 +7,7 @@ export const metadata = {
 
 const EFFECTIVE_DATE = "2025년 1월 1일";
 const COMPANY = "Plaque";
-const CONTACT_EMAIL = "privacy@plaque.app";
+const CONTACT_EMAIL = "eslerkang@gmail.com";
 
 export default function PrivacyPage() {
   return (
