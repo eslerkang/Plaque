@@ -1,8 +1,6 @@
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { ConsentClient } from "./ConsentClient";
-import { CONSENT_COOKIE, CONSENT_COOKIE_OPTS } from "./constants";
 
 export const metadata = { title: "서비스 동의 | Plaque" };
 
@@ -16,7 +14,9 @@ export default async function ConsentPage() {
   // Not logged in → send to login
   if (!user) redirect("/login");
 
-  // Check whether this user has already accepted
+  // If already consented, the restore-consent route handler will have set the cookie.
+  // If the user somehow lands here with terms_accepted_at already set, send them back
+  // through the handler so the cookie is reliably written.
   const { data: profile } = await supabase
     .from("profiles")
     .select("terms_accepted_at")
@@ -24,10 +24,7 @@ export default async function ConsentPage() {
     .single();
 
   if (profile?.terms_accepted_at) {
-    // Already consented — ensure cookie is present and redirect
-    const cookieStore = await cookies();
-    cookieStore.set(CONSENT_COOKIE, "1", CONSENT_COOKIE_OPTS);
-    redirect("/scrapbook");
+    redirect("/api/restore-consent");
   }
 
   return (
