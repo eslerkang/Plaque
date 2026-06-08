@@ -16,6 +16,13 @@ export const BUCKET = "artwork-images";
 const SIGNED_URL_TTL = 3600;
 
 /**
+ * 1×1 transparent PNG as a data URI — used as fallback when signing fails,
+ * so that <Image> never receives an empty `src` attribute (which throws).
+ */
+const PLACEHOLDER_URL =
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
+
+/**
  * Given a list of ArtworkEntry rows (whose image fields are storage paths),
  * batch-generates signed URLs and returns ArtworkWithUrls[].
  *
@@ -46,7 +53,7 @@ export async function withSignedUrls(
       ...a,
       originalUrl: "",
       cleanedUrl: null,
-      displayUrl: "",
+      displayUrl: PLACEHOLDER_URL,
     }));
   }
 
@@ -57,7 +64,7 @@ export async function withSignedUrls(
   }
 
   return artworks.map((a) => {
-    const originalUrl = urlMap[a.original_image_path] ?? "";
+    const originalUrl = urlMap[a.original_image_path] ?? PLACEHOLDER_URL;
     const cleanedUrl = a.cleaned_image_path
       ? (urlMap[a.cleaned_image_path] ?? null)
       : null;

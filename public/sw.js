@@ -1,14 +1,15 @@
 // Plaque Service Worker
 // Strategy:
 //   /_next/static/*  → Cache First (immutable, content-hashed)
-//   Supabase images  → Stale-While-Revalidate
+//   Supabase storage → Network Only (signed URLs expire after 1 hour;
+//                       caching them would cause 403s on stale entries)
 //   Navigation       → Network First + cache fallback
 //   Everything else  → Network First
 
-const CACHE_VERSION = "v1";
+const CACHE_VERSION = "v2";
 const STATIC_CACHE = `plaque-static-${CACHE_VERSION}`;
-const IMAGE_CACHE = `plaque-images-${CACHE_VERSION}`;
 const PAGE_CACHE = `plaque-pages-${CACHE_VERSION}`;
+// IMAGE_CACHE removed — Supabase signed URLs must not be cached by SW
 
 const STATIC_PRECACHE = ["/", "/offline"];
 
@@ -30,11 +31,8 @@ self.addEventListener("activate", (event) => {
       .then((keys) =>
         Promise.all(
           keys
-            .filter(
-              (k) =>
-                ![STATIC_CACHE, IMAGE_CACHE, PAGE_CACHE].includes(k)
-            )
-            .map((k) => caches.delete(k))
+            .filter((k) => ![STATIC_CACHE, PAGE_CACHE].includes(k))
+            .map((k) => caches.delete(k))  // also clears old v1 IMAGE_CACHE
         )
       )
       .then(() => self.clients.claim())
@@ -55,13 +53,13 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Supabase storage images — Stale-While-Revalidate
+  // Supabase storage images — Network Only
+  // Signed URLs expire after 1 hour; caching would cause 403s on stale entries.
   if (
     url.hostname.includes("supabase.co") &&
     url.pathname.includes("/storage/")
   ) {
-    event.respondWith(staleWhileRevalidate(request, IMAGE_CACHE));
-    return;
+    return; // Let browser fetch directly, no SW interception
   }
 
   // Navigation requests (HTML pages) — Network First
@@ -90,19 +88,6 @@ async function cacheFirst(request, cacheName) {
   }
 }
 
-async function staleWhileRevalidate(request, cacheName) {
-  const cache = await caches.open(cacheName);
-  const cached = await cache.match(request);
-
-  const fetchPromise = fetch(request)
-    .then((response) => {
-      if (response.ok) cache.put(request, response.clone());
-      return response;
-    })
-    .catch(() => null);
-
-  return cached ?? (await fetchPromise) ?? new Response("", { status: 503 });
-}
 
 async function networkFirst(request, cacheName) {
   try {

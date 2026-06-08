@@ -184,7 +184,12 @@ export function AddArtworkClient({
         .select("id")
         .single();
 
-      if (insertError) throw insertError;
+      if (insertError) {
+        // DB insert failed — clean up orphaned storage files
+        const orphans = [originalPath, cleanedPath].filter(Boolean) as string[];
+        supabase.storage.from("artwork-images").remove(orphans).catch(() => {});
+        throw insertError;
+      }
       router.push(`/scrapbook/${data.id}`);
       router.refresh();
     } catch (err) {
