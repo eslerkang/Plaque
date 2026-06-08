@@ -2,11 +2,12 @@
 
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/components/LocaleProvider";
 
 const SORT_OPTIONS = [
-  { value: "created_at", label: "최신순" },
-  { value: "visit_date", label: "방문일순" },
-  { value: "rating", label: "평점순" },
+  { value: "created_at", labelKey: "scrapbook.sort.newest" },
+  { value: "visit_date", labelKey: "scrapbook.sort.visitDate" },
+  { value: "rating", labelKey: "scrapbook.sort.rating" },
 ] as const;
 
 type SortValue = (typeof SORT_OPTIONS)[number]["value"];
@@ -15,6 +16,7 @@ export function ScrapbookSortSelector({ current }: { current: SortValue }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { t } = useTranslation();
 
   function handleSort(value: SortValue) {
     const params = new URLSearchParams(searchParams.toString());
@@ -29,7 +31,7 @@ export function ScrapbookSortSelector({ current }: { current: SortValue }) {
 
   return (
     <div className="flex gap-1">
-      {SORT_OPTIONS.map(({ value, label }) => (
+      {SORT_OPTIONS.map(({ value, labelKey }) => (
         <button
           key={value}
           onClick={() => handleSort(value)}
@@ -40,7 +42,7 @@ export function ScrapbookSortSelector({ current }: { current: SortValue }) {
               : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
           )}
         >
-          {label}
+          {t(labelKey)}
         </button>
       ))}
     </div>

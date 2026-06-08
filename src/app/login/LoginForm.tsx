@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { useTranslation } from "@/components/LocaleProvider";
 
 interface LoginFormProps {
   error?: string;
@@ -10,6 +11,7 @@ interface LoginFormProps {
 
 export function LoginForm({ error }: LoginFormProps) {
   const [loading, setLoading] = useState(false);
+  const { t } = useTranslation();
 
   async function handleGoogleLogin() {
     setLoading(true);
@@ -26,7 +28,7 @@ export function LoginForm({ error }: LoginFormProps) {
     <div className="space-y-4">
       {error && (
         <div className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive text-center">
-          로그인에 실패했습니다. 다시 시도해 주세요.
+          {t("login.error")}
         </div>
       )}
 
@@ -56,7 +58,7 @@ export function LoginForm({ error }: LoginFormProps) {
             />
           </svg>
         )}
-        {loading ? "로그인 중..." : "Google로 계속하기"}
+        {loading ? t("login.loading") : t("login.google")}
       </Button>
     </div>
   );

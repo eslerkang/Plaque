@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
+import { LocaleProvider } from "@/components/LocaleProvider";
+import { getLocale } from "@/lib/i18n/server";
 
 export const metadata: Metadata = {
   title: "Plaque — 나만의 미술관 스크랩북",
@@ -23,16 +25,19 @@ export const viewport: Viewport = {
   themeColor: "#faf9f7",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
   return (
-    <html lang="ko" className="h-full">
+    <html lang={locale} className="h-full">
       <body className="h-full bg-background text-foreground antialiased">
         <ServiceWorkerRegistration />
-        {children}
+        <LocaleProvider locale={locale}>
+          {children}
+        </LocaleProvider>
       </body>
     </html>
   );

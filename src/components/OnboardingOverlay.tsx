@@ -4,29 +4,31 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Camera, BookOpen, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/components/LocaleProvider";
 
 const STORAGE_KEY = "plaque_welcomed_v1";
 
-const steps = [
-  {
-    icon: Camera,
-    title: "작품을 사진으로 담기",
-    description: "전시장에서 마음에 드는 작품을 찍으세요. 원근 보정으로 반듯하게 정리해드려요.",
-  },
-  {
-    icon: BookOpen,
-    title: "나만의 도슨트 기록",
-    description: "작가, 연도, 갤러리, 감상 메모까지. 당신만을 위한 작품 해설을 남기세요.",
-  },
-  {
-    icon: Sparkles,
-    title: "개인 미술관 완성",
-    description: "기록이 쌓일수록 세상에 하나뿐인 당신의 미술관이 완성됩니다.",
-  },
-];
-
 export function OnboardingOverlay() {
   const [visible, setVisible] = useState(false);
+  const { t } = useTranslation();
+
+  const steps = [
+    {
+      icon: Camera,
+      title: t("onboarding.feature1.title"),
+      description: t("onboarding.feature1.body"),
+    },
+    {
+      icon: BookOpen,
+      title: t("onboarding.feature2.title"),
+      description: t("onboarding.feature2.body"),
+    },
+    {
+      icon: Sparkles,
+      title: t("onboarding.feature3.title"),
+      description: t("onboarding.feature3.body"),
+    },
+  ];
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -58,10 +60,10 @@ export function OnboardingOverlay() {
         <div className="text-center mb-8 space-y-2">
           <p className="text-xs text-muted-foreground tracking-widest uppercase">Plaque</p>
           <h2 className="text-2xl font-bold leading-snug">
-            나만의 미술관을<br />시작해보세요
+            {t("onboarding.title")}
           </h2>
           <p className="text-sm text-muted-foreground">
-            방문한 작품을 기록하고 영원히 소장하세요
+            {t("onboarding.subtitle")}
           </p>
         </div>
 
@@ -82,14 +84,14 @@ export function OnboardingOverlay() {
 
         {/* CTA */}
         <Button asChild size="lg" className="w-full" onClick={dismiss}>
-          <Link href="/scrapbook/new">첫 작품 기록하기</Link>
+          <Link href="/scrapbook/new">{t("onboarding.cta")}</Link>
         </Button>
 
         <button
           onClick={dismiss}
           className="w-full mt-3 py-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
         >
-          나중에 둘러보기
+          {t("onboarding.dismiss")}
         </button>
       </div>
     </div>

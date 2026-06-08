@@ -13,6 +13,7 @@ import { StarRating } from "@/components/StarRating";
 import { TagInput } from "@/components/TagInput";
 import type { ArtworkWithUrls } from "@/lib/types";
 import { ArrowLeft, Loader2, X } from "lucide-react";
+import { useTranslation } from "@/components/LocaleProvider";
 
 interface EditArtworkClientProps {
   artwork: ArtworkWithUrls;
@@ -21,6 +22,7 @@ interface EditArtworkClientProps {
 
 export function EditArtworkClient({ artwork, existingTags = [] }: EditArtworkClientProps) {
   const router = useRouter();
+  const { t } = useTranslation();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,7 +48,7 @@ export function EditArtworkClient({ artwork, existingTags = [] }: EditArtworkCli
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!title.trim()) {
-      setError("작품 제목은 필수입니다.");
+      setError(t("field.title.error"));
       return;
     }
 
@@ -74,7 +76,7 @@ export function EditArtworkClient({ artwork, existingTags = [] }: EditArtworkCli
       .eq("id", artwork.id);
 
     if (updateError) {
-      setError("저장 중 오류가 발생했습니다.");
+      setError(t("edit.error"));
       setSubmitting(false);
       return;
     }
@@ -90,10 +92,11 @@ export function EditArtworkClient({ artwork, existingTags = [] }: EditArtworkCli
           <Link
             href={`/scrapbook/${artwork.id}`}
             className="p-2 -ml-2 rounded-full hover:bg-muted transition-colors"
+            aria-label={t("edit.cancel")}
           >
             <ArrowLeft className="h-5 w-5" />
           </Link>
-          <h1 className="font-semibold flex-1">작품 편집</h1>
+          <h1 className="font-semibold flex-1">{t("edit.title")}</h1>
         </div>
       </header>
 
@@ -122,7 +125,7 @@ export function EditArtworkClient({ artwork, existingTags = [] }: EditArtworkCli
                       : "border-border bg-transparent text-foreground"
                   }`}
                 >
-                  원본
+                  {t("edit.original")}
                 </button>
                 <button
                   type="button"
@@ -133,7 +136,7 @@ export function EditArtworkClient({ artwork, existingTags = [] }: EditArtworkCli
                       : "border-border bg-transparent text-foreground"
                   }`}
                 >
-                  보정본
+                  {t("edit.cleaned")}
                 </button>
               </div>
             )}
@@ -141,7 +144,7 @@ export function EditArtworkClient({ artwork, existingTags = [] }: EditArtworkCli
 
           <div className="space-y-2">
             <Label htmlFor="title">
-              작품 제목 <span className="text-destructive">*</span>
+              {t("field.title")} <span className="text-destructive">*</span>
             </Label>
             <Input
               id="title"
@@ -152,7 +155,7 @@ export function EditArtworkClient({ artwork, existingTags = [] }: EditArtworkCli
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="artist">작가</Label>
+            <Label htmlFor="artist">{t("field.artist")}</Label>
             <Input
               id="artist"
               value={artist}
@@ -162,7 +165,7 @@ export function EditArtworkClient({ artwork, existingTags = [] }: EditArtworkCli
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label htmlFor="year">제작 연도</Label>
+              <Label htmlFor="year">{t("field.year")}</Label>
               <Input
                 id="year"
                 value={year}
@@ -170,7 +173,7 @@ export function EditArtworkClient({ artwork, existingTags = [] }: EditArtworkCli
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="medium">재료/기법</Label>
+              <Label htmlFor="medium">{t("field.medium")}</Label>
               <Input
                 id="medium"
                 value={medium}
@@ -180,7 +183,7 @@ export function EditArtworkClient({ artwork, existingTags = [] }: EditArtworkCli
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="gallery">미술관 / 갤러리</Label>
+            <Label htmlFor="gallery">{t("field.gallery")}</Label>
             <Input
               id="gallery"
               value={gallery}
@@ -189,7 +192,7 @@ export function EditArtworkClient({ artwork, existingTags = [] }: EditArtworkCli
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="exhibition">전시명</Label>
+            <Label htmlFor="exhibition">{t("field.exhibition")}</Label>
             <Input
               id="exhibition"
               value={exhibition}
@@ -198,7 +201,7 @@ export function EditArtworkClient({ artwork, existingTags = [] }: EditArtworkCli
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="visit_date">방문 날짜</Label>
+            <Label htmlFor="visit_date">{t("field.visitDate")}</Label>
             <Input
               id="visit_date"
               type="date"
@@ -208,7 +211,7 @@ export function EditArtworkClient({ artwork, existingTags = [] }: EditArtworkCli
           </div>
 
           <div className="space-y-2">
-            <Label>평점</Label>
+            <Label>{t("field.rating")}</Label>
             <div className="flex items-center gap-3">
               <StarRating value={rating} onChange={setRating} size="lg" />
               {rating && (
@@ -216,7 +219,7 @@ export function EditArtworkClient({ artwork, existingTags = [] }: EditArtworkCli
                   type="button"
                   onClick={() => setRating(null)}
                   className="text-muted-foreground hover:text-foreground"
-                  aria-label="평점 삭제"
+                  aria-label="clear rating"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -225,7 +228,7 @@ export function EditArtworkClient({ artwork, existingTags = [] }: EditArtworkCli
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="note">감상 메모</Label>
+            <Label htmlFor="note">{t("field.note")}</Label>
             <Textarea
               id="note"
               rows={4}
@@ -235,7 +238,7 @@ export function EditArtworkClient({ artwork, existingTags = [] }: EditArtworkCli
           </div>
 
           <div className="space-y-2">
-            <Label>태그</Label>
+            <Label>{t("field.tags")}</Label>
             <TagInput
               value={tags}
               onChange={setTags}
@@ -249,7 +252,7 @@ export function EditArtworkClient({ artwork, existingTags = [] }: EditArtworkCli
 
           <div className="flex gap-3 pt-2 pb-4">
             <Button type="button" variant="outline" className="flex-1" asChild>
-              <Link href={`/scrapbook/${artwork.id}`}>취소</Link>
+              <Link href={`/scrapbook/${artwork.id}`}>{t("edit.cancel")}</Link>
             </Button>
             <Button
               type="submit"
@@ -259,7 +262,7 @@ export function EditArtworkClient({ artwork, existingTags = [] }: EditArtworkCli
               {submitting ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                "저장"
+                t("edit.save")
               )}
             </Button>
           </div>

@@ -3,6 +3,7 @@
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { LayoutGrid, List } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/components/LocaleProvider";
 
 export type ViewMode = "grid" | "timeline";
 
@@ -10,6 +11,7 @@ export function ScrapbookViewToggle({ current }: { current: ViewMode }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { t } = useTranslation();
 
   function setView(view: ViewMode) {
     const params = new URLSearchParams(searchParams.toString());
@@ -34,7 +36,7 @@ export function ScrapbookViewToggle({ current }: { current: ViewMode }) {
               ? "bg-background shadow-sm text-foreground"
               : "text-muted-foreground hover:text-foreground"
           )}
-          aria-label={view === "grid" ? "그리드 뷰" : "타임라인 뷰"}
+          aria-label={view === "grid" ? t("scrapbook.view.grid") : t("scrapbook.view.timeline")}
         >
           {view === "grid" ? (
             <LayoutGrid className="h-3.5 w-3.5" />

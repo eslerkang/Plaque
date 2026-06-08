@@ -4,16 +4,18 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BookOpen, PlusCircle, Search, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const navItems = [
-  { href: "/scrapbook", label: "스크랩북", icon: BookOpen },
-  { href: "/scrapbook/new", label: "추가", icon: PlusCircle },
-  { href: "/search", label: "검색", icon: Search },
-  { href: "/settings", label: "설정", icon: Settings },
-];
+import { useTranslation } from "@/components/LocaleProvider";
 
 export function BottomNav() {
   const pathname = usePathname();
+  const { t } = useTranslation();
+
+  const navItems = [
+    { href: "/scrapbook", label: t("nav.scrapbook"), icon: BookOpen },
+    { href: "/scrapbook/new", label: t("add.step.upload"), icon: PlusCircle },
+    { href: "/search", label: t("nav.search"), icon: Search },
+    { href: "/settings", label: t("nav.settings"), icon: Settings },
+  ];
 
   return (
     <nav

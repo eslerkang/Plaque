@@ -21,6 +21,7 @@ import {
   ChevronLeft,
   X,
 } from "lucide-react";
+import { useTranslation } from "@/components/LocaleProvider";
 
 type Step = "upload" | "review" | "metadata";
 
@@ -60,6 +61,7 @@ export function AddArtworkClient({
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const processorRef = useRef<ImageProcessorHandle>(null);
+  const { t } = useTranslation();
 
   const [step, setStep] = useState<Step>("upload");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -106,20 +108,19 @@ export function AddArtworkClient({
   // ── File selection ───────────────────────────────────────────────────────────
   const handleFile = useCallback((file: File) => {
     if (!file.type.startsWith("image/")) {
-      setError("이미지 파일만 업로드할 수 있어요.");
+      setError(t("add.upload.error"));
       return;
     }
     setSelectedFile(file);
     setProcessed(null);
     setError(null);
     setStep("review");
-    // Processing triggered by useEffect above, after render
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) handleFile(file);
-    // Reset input so same file can be re-selected
     e.target.value = "";
   };
 
@@ -130,7 +131,6 @@ export function AddArtworkClient({
   };
 
   // ── Upload to Supabase Storage ───────────────────────────────────────────────
-  /** Uploads a data URL to private storage and returns the storage PATH (not a public URL) */
   async function uploadImage(dataUrl: string, suffix: string): Promise<string> {
     const supabase = createClient();
     const blob = await (await fetch(dataUrl)).blob();
@@ -140,14 +140,13 @@ export function AddArtworkClient({
       .from("artwork-images")
       .upload(path, blob, { contentType: blob.type, upsert: false });
     if (uploadError) throw uploadError;
-    // Return path only — not a public URL (bucket is private)
     return path;
   }
 
   // ── Submit ───────────────────────────────────────────────────────────────────
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.title.trim()) { setError("작품 제목은 필수입니다."); return; }
+    if (!form.title.trim()) { setError(t("field.title.error")); return; }
     if (!processed) return;
 
     setSubmitting(true);
@@ -185,7 +184,6 @@ export function AddArtworkClient({
         .single();
 
       if (insertError) {
-        // DB insert failed — clean up orphaned storage files
         const orphans = [originalPath, cleanedPath].filter(Boolean) as string[];
         supabase.storage.from("artwork-images").remove(orphans).catch(() => {});
         throw insertError;
@@ -194,7 +192,7 @@ export function AddArtworkClient({
       router.refresh();
     } catch (err) {
       console.error(err);
-      setError("저장 중 오류가 발생했습니다. 다시 시도해 주세요.");
+      setError(t("add.metadata.error"));
       setSubmitting(false);
     }
   }
@@ -202,6 +200,12 @@ export function AddArtworkClient({
   function updateForm(key: keyof FormData, value: string | number | null | string[]) {
     setForm((f) => ({ ...f, [key]: value }));
   }
+
+  const stepLabels: Record<Step, string> = {
+    upload: t("add.step.upload"),
+    review: t("add.step.review"),
+    metadata: t("add.step.metadata"),
+  };
 
   // ── Render ───────────────────────────────────────────────────────────────────
   return (
@@ -221,15 +225,11 @@ export function AddArtworkClient({
               else router.back();
             }}
             className="p-2 -ml-2 rounded-full hover:bg-muted transition-colors"
-            aria-label="뒤로"
+            aria-label={t("common.back")}
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
-          <h1 className="font-semibold text-base flex-1">
-            {step === "upload" && "사진 선택"}
-            {step === "review" && "이미지 검토"}
-            {step === "metadata" && "작품 정보"}
-          </h1>
+          <h1 className="font-semibold text-base flex-1">{stepLabels[step]}</h1>
           <div className="flex gap-1.5">
             {(["upload", "review", "metadata"] as Step[]).map((s, i) => (
               <div
@@ -258,7 +258,7 @@ export function AddArtworkClient({
               accept="image/*"
               onChange={handleFileChange}
               className="hidden"
-              aria-label="이미지 파일 선택"
+              aria-label={t("add.upload.title")}
             />
 
             <div
@@ -274,10 +274,8 @@ export function AddArtworkClient({
                 <Camera className="h-7 w-7 text-muted-foreground" />
               </div>
               <div className="space-y-1">
-                <p className="font-medium text-foreground">사진을 선택하세요</p>
-                <p className="text-sm text-muted-foreground">
-                  카메라로 찍거나 갤러리에서 가져오기
-                </p>
+                <p className="font-medium text-foreground">{t("add.upload.title")}</p>
+                <p className="text-sm text-muted-foreground">{t("add.upload.subtitle")}</p>
               </div>
             </div>
 
@@ -293,7 +291,7 @@ export function AddArtworkClient({
                 }}
               >
                 <ImageIcon className="h-5 w-5" />
-                갤러리
+                {t("add.upload.gallery")}
               </Button>
               <Button
                 size="lg"
@@ -307,7 +305,7 @@ export function AddArtworkClient({
                 }}
               >
                 <Camera className="h-5 w-5" />
-                카메라
+                {t("add.upload.camera")}
               </Button>
             </div>
 
@@ -322,9 +320,8 @@ export function AddArtworkClient({
               <div className="space-y-6">
                 <div className="flex items-center justify-center gap-2 py-12 text-muted-foreground">
                   <Loader2 className="h-5 w-5 animate-spin" />
-                  <span>이미지 분석 중...</span>
+                  <span>{t("add.review.analyzing")}</span>
                 </div>
-                {/* Skip button — appears immediately so user is never fully stuck */}
                 <Button
                   variant="outline"
                   className="w-full"
@@ -342,7 +339,7 @@ export function AddArtworkClient({
                     reader.readAsDataURL(selectedFile);
                   }}
                 >
-                  원본으로 바로 계속하기
+                  {t("add.review.skipBtn")}
                 </Button>
               </div>
             ) : (
@@ -365,13 +362,13 @@ export function AddArtworkClient({
                         className="accent-foreground"
                       />
                       <label htmlFor="original" className="text-sm font-medium cursor-pointer">
-                        원본 이미지
+                        {t("add.review.original")}
                       </label>
                     </div>
                     <div className="relative aspect-[4/3] bg-muted">
                       <Image
                         src={processed.originalDataUrl}
-                        alt="원본 이미지"
+                        alt={t("add.review.original")}
                         fill
                         className="object-contain"
                         unoptimized
@@ -397,16 +394,18 @@ export function AddArtworkClient({
                           className="accent-foreground"
                         />
                         <label htmlFor="cleaned" className="text-sm font-medium cursor-pointer">
-                          보정된 이미지
+                          {t("add.review.cleaned")}
                           {processed.confidence === "high" && (
-                            <span className="ml-2 text-xs text-accent font-normal">권장</span>
+                            <span className="ml-2 text-xs text-accent font-normal">
+                              {t("add.review.recommended")}
+                            </span>
                           )}
                         </label>
                       </div>
                       <div className="relative aspect-[4/3] bg-muted">
                         <Image
                           src={processed.cleanedDataUrl}
-                          alt="보정된 이미지"
+                          alt={t("add.review.cleaned")}
                           fill
                           className="object-contain"
                           unoptimized
@@ -415,7 +414,7 @@ export function AddArtworkClient({
                     </div>
                   ) : (
                     <div className="rounded-xl border border-dashed border-border p-4 text-sm text-muted-foreground text-center">
-                      작품 경계를 자동으로 찾지 못했어요. 원본 이미지를 사용할게요.
+                      {t("add.review.noCorrection")}
                     </div>
                   )}
                 </div>
@@ -425,7 +424,7 @@ export function AddArtworkClient({
                   className="w-full gap-2"
                   onClick={() => setStep("metadata")}
                 >
-                  다음
+                  {t("add.review.next")}
                   <ChevronRight className="h-5 w-5" />
                 </Button>
               </>
@@ -445,7 +444,7 @@ export function AddArtworkClient({
                         ? processed.cleanedDataUrl
                         : processed.originalDataUrl
                     }
-                    alt="선택된 이미지"
+                    alt={t("field.title")}
                     fill
                     className="object-cover"
                     unoptimized
@@ -453,14 +452,16 @@ export function AddArtworkClient({
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-muted-foreground">
-                    {selectedType === "cleaned" ? "보정된 이미지" : "원본 이미지"} 선택됨
+                    {selectedType === "cleaned"
+                      ? t("add.metadata.cleanedSelected")
+                      : t("add.metadata.originalSelected")}
                   </p>
                   <button
                     type="button"
                     onClick={() => setStep("review")}
                     className="text-xs text-foreground underline underline-offset-2 mt-0.5"
                   >
-                    변경하기
+                    {t("add.metadata.changeImage")}
                   </button>
                 </div>
               </div>
@@ -468,11 +469,11 @@ export function AddArtworkClient({
 
             <div className="space-y-2">
               <Label htmlFor="title">
-                작품 제목 <span className="text-destructive">*</span>
+                {t("field.title")} <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="title"
-                placeholder="예: 별이 빛나는 밤"
+                placeholder={t("field.title.placeholder")}
                 value={form.title}
                 onChange={(e) => updateForm("title", e.target.value)}
                 required
@@ -481,10 +482,10 @@ export function AddArtworkClient({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="artist">작가</Label>
+              <Label htmlFor="artist">{t("field.artist")}</Label>
               <Input
                 id="artist"
-                placeholder="예: 빈센트 반 고흐"
+                placeholder={t("field.artist.placeholder")}
                 value={form.artist_name}
                 onChange={(e) => updateForm("artist_name", e.target.value)}
               />
@@ -492,19 +493,19 @@ export function AddArtworkClient({
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
-                <Label htmlFor="year">제작 연도</Label>
+                <Label htmlFor="year">{t("field.year")}</Label>
                 <Input
                   id="year"
-                  placeholder="예: 1889"
+                  placeholder={t("field.year.placeholder")}
                   value={form.year}
                   onChange={(e) => updateForm("year", e.target.value)}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="medium">재료 / 기법</Label>
+                <Label htmlFor="medium">{t("field.medium")}</Label>
                 <Input
                   id="medium"
-                  placeholder="예: 유화"
+                  placeholder={t("field.medium.placeholder")}
                   value={form.medium}
                   onChange={(e) => updateForm("medium", e.target.value)}
                 />
@@ -512,27 +513,27 @@ export function AddArtworkClient({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="gallery">미술관 / 갤러리</Label>
+              <Label htmlFor="gallery">{t("field.gallery")}</Label>
               <Input
                 id="gallery"
-                placeholder="예: 뉴욕 현대미술관 (MoMA)"
+                placeholder={t("field.gallery.placeholder")}
                 value={form.gallery_name}
                 onChange={(e) => updateForm("gallery_name", e.target.value)}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="exhibition">전시명</Label>
+              <Label htmlFor="exhibition">{t("field.exhibition")}</Label>
               <Input
                 id="exhibition"
-                placeholder="예: 반 고흐: 별을 향한 여정"
+                placeholder={t("field.exhibition.placeholder")}
                 value={form.exhibition_title}
                 onChange={(e) => updateForm("exhibition_title", e.target.value)}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="visit_date">방문 날짜</Label>
+              <Label htmlFor="visit_date">{t("field.visitDate")}</Label>
               <Input
                 id="visit_date"
                 type="date"
@@ -542,7 +543,7 @@ export function AddArtworkClient({
             </div>
 
             <div className="space-y-2">
-              <Label>평점</Label>
+              <Label>{t("field.rating")}</Label>
               <div className="flex items-center gap-3">
                 <StarRating
                   value={form.rating}
@@ -554,7 +555,7 @@ export function AddArtworkClient({
                     type="button"
                     onClick={() => updateForm("rating", null)}
                     className="text-muted-foreground hover:text-foreground"
-                    aria-label="평점 삭제"
+                    aria-label="clear rating"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -563,10 +564,10 @@ export function AddArtworkClient({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="note">감상 메모</Label>
+              <Label htmlFor="note">{t("field.note")}</Label>
               <Textarea
                 id="note"
-                placeholder="이 작품에 대한 생각이나 느낌을 자유롭게 적어보세요..."
+                placeholder={t("field.note.placeholder")}
                 rows={4}
                 value={form.personal_note}
                 onChange={(e) => updateForm("personal_note", e.target.value)}
@@ -574,12 +575,12 @@ export function AddArtworkClient({
             </div>
 
             <div className="space-y-2">
-              <Label>태그</Label>
+              <Label>{t("field.tags")}</Label>
               <TagInput
                 value={form.tags}
                 onChange={(tags) => updateForm("tags", tags)}
                 suggestions={existingTags}
-                placeholder="예: 인상주의, 풍경화"
+                placeholder={t("field.tags.placeholder")}
               />
             </div>
 
@@ -594,7 +595,7 @@ export function AddArtworkClient({
                 onClick={() => setStep("review")}
               >
                 <ChevronLeft className="h-5 w-5" />
-                이전
+                {t("add.metadata.prev")}
               </Button>
               <Button
                 type="submit"
@@ -605,10 +606,10 @@ export function AddArtworkClient({
                 {submitting ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    저장 중...
+                    {t("add.metadata.saving")}
                   </>
                 ) : (
-                  "스크랩북에 저장"
+                  t("add.metadata.save")
                 )}
               </Button>
             </div>

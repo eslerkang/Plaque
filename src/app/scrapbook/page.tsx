@@ -11,6 +11,8 @@ import { OnboardingOverlay } from "@/components/OnboardingOverlay";
 import { Suspense } from "react";
 import { withSignedUrls } from "@/lib/supabase/storage";
 import type { ArtworkEntry } from "@/lib/types";
+import { getLocale } from "@/lib/i18n/server";
+import { t } from "@/lib/i18n";
 
 type SortKey = "created_at" | "visit_date" | "rating";
 type ViewMode = "grid" | "timeline";
@@ -26,6 +28,7 @@ export default async function ScrapbookPage({
 }) {
   const supabase = await createClient();
   const params = await searchParams;
+  const locale = await getLocale();
 
   const {
     data: { user },
@@ -62,12 +65,12 @@ export default async function ScrapbookPage({
       {/* Header */}
       <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur-sm">
         <div className="flex items-center justify-between px-4 h-14 max-w-lg mx-auto">
-          <h1 className="text-xl font-bold tracking-tight">Plaque</h1>
+          <h1 className="text-xl font-bold tracking-tight">{t("scrapbook.title", locale)}</h1>
           {list.length > 0 && (
             <Link
               href="/scrapbook/new"
               className="p-2 rounded-full hover:bg-muted transition-colors"
-              aria-label="작품 추가"
+              aria-label={t("scrapbook.addArtwork", locale)}
             >
               <PlusCircle className="h-5 w-5" />
             </Link>
@@ -78,7 +81,7 @@ export default async function ScrapbookPage({
       <main className="flex-1 px-4 py-6 max-w-lg mx-auto w-full">
         {error && (
           <p className="text-sm text-destructive text-center py-4">
-            작품을 불러오는 중 오류가 발생했습니다.
+            {t("scrapbook.error", locale)}
           </p>
         )}
 
@@ -88,17 +91,17 @@ export default async function ScrapbookPage({
           <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 text-center">
             <div className="space-y-2">
               <p className="text-2xl">🖼</p>
-              <p className="font-semibold text-foreground">첫 작품을 기록해보세요.</p>
+              <p className="font-semibold text-foreground">{t("scrapbook.empty.headline", locale)}</p>
               <p className="text-sm text-muted-foreground">
-                전시장에서 만난 작품을 사진으로 남기고
-                <br />
-                나만의 미술관을 만들어보세요.
+                {t("scrapbook.empty.body", locale).split("\n").map((line, i) => (
+                  <span key={i}>{line}{i === 0 && <br />}</span>
+                ))}
               </p>
             </div>
             <Button asChild size="lg" className="gap-2">
               <Link href="/scrapbook/new">
                 <PlusCircle className="h-5 w-5" />
-                작품 추가하기
+                {t("scrapbook.empty.cta", locale)}
               </Link>
             </Button>
           </div>
@@ -107,7 +110,7 @@ export default async function ScrapbookPage({
         {list.length > 0 && (
           <>
             <div className="flex items-center justify-between mb-4">
-              <p className="text-xs text-muted-foreground">{list.length}점의 작품</p>
+              <p className="text-xs text-muted-foreground">{t("scrapbook.count", locale, { n: list.length })}</p>
               <div className="flex items-center gap-2">
                 <Suspense fallback={null}>
                   {viewMode === "grid" && <ScrapbookSortSelector current={sortKey} />}
