@@ -5,10 +5,10 @@ import Link from "next/link";
 import { ArrowLeft, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
-import type { ArtworkEntry } from "@/lib/types";
+import type { ArtworkWithUrls } from "@/lib/types";
 
 interface ExportViewProps {
-  artworks: ArtworkEntry[];
+  artworks: ArtworkWithUrls[];
 }
 
 function RatingDots({ value }: { value: number }) {
@@ -31,6 +31,7 @@ function RatingDots({ value }: { value: number }) {
 }
 
 export function ExportView({ artworks }: ExportViewProps) {
+
   useEffect(() => {
     // Small delay so images can load before print dialog
     const timer = setTimeout(() => {}, 500);
@@ -111,10 +112,7 @@ export function ExportView({ artworks }: ExportViewProps) {
         {/* Artwork entries */}
         <div>
           {artworks.map((artwork, index) => {
-            const imgUrl =
-              artwork.selected_image_type === "cleaned" && artwork.cleaned_image_url
-                ? artwork.cleaned_image_url
-                : artwork.original_image_url;
+            const imgUrl = artwork.displayUrl;
 
             return (
               <div

@@ -11,11 +11,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { StarRating } from "@/components/StarRating";
 import { TagInput } from "@/components/TagInput";
-import type { ArtworkEntry } from "@/lib/types";
+import type { ArtworkWithUrls } from "@/lib/types";
 import { ArrowLeft, Loader2, X } from "lucide-react";
 
 interface EditArtworkClientProps {
-  artwork: ArtworkEntry;
+  artwork: ArtworkWithUrls;
   existingTags?: string[];
 }
 
@@ -39,9 +39,9 @@ export function EditArtworkClient({ artwork, existingTags = [] }: EditArtworkCli
   );
 
   const displayImageUrl =
-    selectedType === "cleaned" && artwork.cleaned_image_url
-      ? artwork.cleaned_image_url
-      : artwork.original_image_url;
+    selectedType === "cleaned" && artwork.cleanedUrl
+      ? artwork.cleanedUrl
+      : artwork.originalUrl;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -111,7 +111,7 @@ export function EditArtworkClient({ artwork, existingTags = [] }: EditArtworkCli
               />
             </div>
 
-            {artwork.cleaned_image_url && (
+            {artwork.cleanedUrl && (
               <div className="flex gap-2">
                 <button
                   type="button"

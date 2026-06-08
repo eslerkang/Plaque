@@ -3,17 +3,17 @@ import Image from "next/image";
 import { MapPin, CalendarDays } from "lucide-react";
 import { formatDate, formatDateShort } from "@/lib/utils";
 import { StarRating } from "@/components/StarRating";
-import type { ArtworkEntry } from "@/lib/types";
+import type { ArtworkWithUrls } from "@/lib/types";
 
 interface VisitGroup {
   key: string;
   gallery: string | null;
   exhibition: string | null;
   visitDate: string | null;
-  artworks: ArtworkEntry[];
+  artworks: ArtworkWithUrls[];
 }
 
-function groupByVisit(artworks: ArtworkEntry[]): VisitGroup[] {
+function groupByVisit(artworks: ArtworkWithUrls[]): VisitGroup[] {
   const map = new Map<string, VisitGroup>();
 
   for (const a of artworks) {
@@ -49,12 +49,7 @@ function groupByVisit(artworks: ArtworkEntry[]): VisitGroup[] {
   });
 }
 
-function ArtworkRow({ artwork }: { artwork: ArtworkEntry }) {
-  const imgUrl =
-    artwork.selected_image_type === "cleaned" && artwork.cleaned_image_url
-      ? artwork.cleaned_image_url
-      : artwork.original_image_url;
-
+function ArtworkRow({ artwork }: { artwork: ArtworkWithUrls }) {
   return (
     <Link
       href={`/scrapbook/${artwork.id}`}
@@ -62,11 +57,11 @@ function ArtworkRow({ artwork }: { artwork: ArtworkEntry }) {
     >
       <div className="relative w-14 h-14 rounded-lg overflow-hidden bg-muted flex-shrink-0">
         <Image
-          src={imgUrl}
+          src={artwork.displayUrl}
           alt={artwork.title}
           fill
+          unoptimized
           className="object-cover"
-          sizes="56px"
         />
       </div>
       <div className="flex-1 min-w-0 py-0.5">
@@ -87,7 +82,7 @@ function ArtworkRow({ artwork }: { artwork: ArtworkEntry }) {
   );
 }
 
-export function TimelineView({ artworks }: { artworks: ArtworkEntry[] }) {
+export function TimelineView({ artworks }: { artworks: ArtworkWithUrls[] }) {
   const groups = groupByVisit(artworks);
 
   return (

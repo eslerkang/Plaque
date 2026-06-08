@@ -10,6 +10,7 @@ import { StarRating } from "@/components/StarRating";
 import { AIFeaturePlaceholder } from "@/components/AIFeaturePlaceholder";
 import { DeleteArtworkButton } from "./DeleteArtworkButton";
 import { formatDate } from "@/lib/utils";
+import { withSignedUrls } from "@/lib/supabase/storage";
 import type { ArtworkEntry } from "@/lib/types";
 export default async function ArtworkDetailPage({
   params,
@@ -34,11 +35,8 @@ export default async function ArtworkDetailPage({
 
   if (error || !artwork) notFound();
 
-  const entry = artwork as ArtworkEntry;
-  const displayImageUrl =
-    entry.selected_image_type === "cleaned" && entry.cleaned_image_url
-      ? entry.cleaned_image_url
-      : entry.original_image_url;
+  const [entry] = await withSignedUrls([artwork as ArtworkEntry], supabase);
+  const displayImageUrl = entry.displayUrl;
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -72,7 +70,7 @@ export default async function ArtworkDetailPage({
             fill
             className="object-contain"
             priority
-            sizes="(max-width: 512px) 100vw, 512px"
+            unoptimized
           />
         </div>
 
@@ -150,8 +148,8 @@ export default async function ArtworkDetailPage({
             </div>
           )}
 
-          {/* Original image toggle */}
-          {entry.cleaned_image_url && entry.selected_image_type === "cleaned" && (
+          {/* Original image toggle — only shown when cleaned is selected */}
+          {entry.cleanedUrl && entry.selected_image_type === "cleaned" && (
             <details className="group">
               <summary className="text-sm text-muted-foreground cursor-pointer hover:text-foreground list-none flex items-center gap-1">
                 <span className="group-open:hidden">원본 이미지 보기 ↓</span>
@@ -159,11 +157,11 @@ export default async function ArtworkDetailPage({
               </summary>
               <div className="mt-3 relative aspect-[4/3] rounded-lg overflow-hidden bg-muted">
                 <Image
-                  src={entry.original_image_url}
+                  src={entry.originalUrl}
                   alt="원본 이미지"
                   fill
+                  unoptimized
                   className="object-contain"
-                  sizes="(max-width: 512px) 100vw, 512px"
                 />
               </div>
             </details>

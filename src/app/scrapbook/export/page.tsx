@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { ExportView } from "./ExportView";
+import { withSignedUrls } from "@/lib/supabase/storage";
 import type { ArtworkEntry } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -21,5 +22,8 @@ export default async function ExportPage() {
     .order("visit_date", { ascending: false, nullsFirst: false })
     .order("created_at", { ascending: false });
 
-  return <ExportView artworks={(artworks ?? []) as ArtworkEntry[]} />;
+  const rawList = (artworks ?? []) as ArtworkEntry[];
+  const artworksWithUrls = await withSignedUrls(rawList, supabase);
+
+  return <ExportView artworks={artworksWithUrls} />;
 }

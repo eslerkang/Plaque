@@ -6,11 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ArtworkCard } from "@/components/ArtworkCard";
 import { StarRating } from "@/components/StarRating";
-import type { ArtworkEntry } from "@/lib/types";
+import type { ArtworkWithUrls } from "@/lib/types";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 
 interface SearchClientProps {
-  artworks: ArtworkEntry[];
+  artworks: ArtworkWithUrls[];
 }
 
 interface Filters {

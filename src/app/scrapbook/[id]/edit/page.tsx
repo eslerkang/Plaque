@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import { EditArtworkClient } from "./EditArtworkClient";
+import { withSignedUrls } from "@/lib/supabase/storage";
 import type { ArtworkEntry } from "@/lib/types";
 
 export default async function EditArtworkPage({
@@ -36,9 +37,11 @@ export default async function EditArtworkPage({
     new Set((allArtworks ?? []).flatMap((a) => a.tags ?? []))
   ).sort();
 
+  const [artworkWithUrls] = await withSignedUrls([artwork as ArtworkEntry], supabase);
+
   return (
     <EditArtworkClient
-      artwork={artwork as ArtworkEntry}
+      artwork={artworkWithUrls}
       existingTags={existingTags}
     />
   );

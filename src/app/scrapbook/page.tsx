@@ -9,6 +9,7 @@ import { ScrapbookViewToggle } from "@/components/ScrapbookViewToggle";
 import { TimelineView } from "@/components/TimelineView";
 import { OnboardingOverlay } from "@/components/OnboardingOverlay";
 import { Suspense } from "react";
+import { withSignedUrls } from "@/lib/supabase/storage";
 import type { ArtworkEntry } from "@/lib/types";
 
 type SortKey = "created_at" | "visit_date" | "rating";
@@ -53,7 +54,8 @@ export default async function ScrapbookPage({
   }
 
   const { data: artworks, error } = await query;
-  const list = (artworks ?? []) as ArtworkEntry[];
+  const rawList = (artworks ?? []) as ArtworkEntry[];
+  const list = await withSignedUrls(rawList, supabase);
 
   return (
     <div className="flex flex-col min-h-full">

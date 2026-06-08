@@ -130,6 +130,7 @@ export function AddArtworkClient({
   };
 
   // ── Upload to Supabase Storage ───────────────────────────────────────────────
+  /** Uploads a data URL to private storage and returns the storage PATH (not a public URL) */
   async function uploadImage(dataUrl: string, suffix: string): Promise<string> {
     const supabase = createClient();
     const blob = await (await fetch(dataUrl)).blob();
@@ -139,8 +140,8 @@ export function AddArtworkClient({
       .from("artwork-images")
       .upload(path, blob, { contentType: blob.type, upsert: false });
     if (uploadError) throw uploadError;
-    const { data } = supabase.storage.from("artwork-images").getPublicUrl(path);
-    return data.publicUrl;
+    // Return path only — not a public URL (bucket is private)
+    return path;
   }
 
   // ── Submit ───────────────────────────────────────────────────────────────────
@@ -154,10 +155,10 @@ export function AddArtworkClient({
 
     try {
       const supabase = createClient();
-      const originalUrl = await uploadImage(processed.originalDataUrl, "original");
-      let cleanedUrl: string | null = null;
+      const originalPath = await uploadImage(processed.originalDataUrl, "original");
+      let cleanedPath: string | null = null;
       if (processed.cleanedDataUrl) {
-        cleanedUrl = await uploadImage(processed.cleanedDataUrl, "cleaned");
+        cleanedPath = await uploadImage(processed.cleanedDataUrl, "cleaned");
       }
 
       const tags = form.tags;
@@ -166,8 +167,8 @@ export function AddArtworkClient({
         .from("artwork_entries")
         .insert({
           user_id: userId,
-          original_image_url: originalUrl,
-          cleaned_image_url: cleanedUrl,
+          original_image_path: originalPath,
+          cleaned_image_path: cleanedPath,
           selected_image_type: selectedType,
           title: form.title.trim(),
           artist_name: form.artist_name.trim() || null,
