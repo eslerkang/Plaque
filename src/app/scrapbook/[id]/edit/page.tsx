@@ -17,14 +17,29 @@ export default async function EditArtworkPage({
 
   if (!user) redirect("/login");
 
-  const { data: artwork, error } = await supabase
-    .from("artwork_entries")
-    .select("*")
-    .eq("id", id)
-    .eq("user_id", user.id)
-    .single();
+  const [{ data: artwork, error }, { data: allArtworks }] = await Promise.all([
+    supabase
+      .from("artwork_entries")
+      .select("*")
+      .eq("id", id)
+      .eq("user_id", user.id)
+      .single(),
+    supabase
+      .from("artwork_entries")
+      .select("tags")
+      .eq("user_id", user.id),
+  ]);
 
   if (error || !artwork) notFound();
 
-  return <EditArtworkClient artwork={artwork as ArtworkEntry} />;
+  const existingTags = Array.from(
+    new Set((allArtworks ?? []).flatMap((a) => a.tags ?? []))
+  ).sort();
+
+  return (
+    <EditArtworkClient
+      artwork={artwork as ArtworkEntry}
+      existingTags={existingTags}
+    />
+  );
 }

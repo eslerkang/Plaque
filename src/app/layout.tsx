@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
 
 export const metadata: Metadata = {
   title: "Plaque — 나만의 미술관 스크랩북",
@@ -30,6 +31,7 @@ export default function RootLayout({
   return (
     <html lang="ko" className="h-full">
       <body className="h-full bg-background text-foreground antialiased">
+        <ServiceWorkerRegistration />
         {children}
       </body>
     </html>

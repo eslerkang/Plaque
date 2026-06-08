@@ -5,10 +5,14 @@ import { ArtworkCard } from "@/components/ArtworkCard";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { ScrapbookSortSelector } from "@/components/ScrapbookSortSelector";
+import { ScrapbookViewToggle } from "@/components/ScrapbookViewToggle";
+import { TimelineView } from "@/components/TimelineView";
+import { OnboardingOverlay } from "@/components/OnboardingOverlay";
 import { Suspense } from "react";
 import type { ArtworkEntry } from "@/lib/types";
 
 type SortKey = "created_at" | "visit_date" | "rating";
+type ViewMode = "grid" | "timeline";
 
 function isValidSort(s: string | undefined): s is SortKey {
   return s === "visit_date" || s === "rating";
@@ -17,7 +21,7 @@ function isValidSort(s: string | undefined): s is SortKey {
 export default async function ScrapbookPage({
   searchParams,
 }: {
-  searchParams: Promise<{ sort?: string }>;
+  searchParams: Promise<{ sort?: string; view?: string }>;
 }) {
   const supabase = await createClient();
   const params = await searchParams;
@@ -29,6 +33,7 @@ export default async function ScrapbookPage({
   if (!user) redirect("/login");
 
   const sortKey: SortKey = isValidSort(params.sort) ? params.sort : "created_at";
+  const viewMode: ViewMode = params.view === "timeline" ? "timeline" : "grid";
 
   let query = supabase
     .from("artwork_entries")
@@ -75,6 +80,8 @@ export default async function ScrapbookPage({
           </p>
         )}
 
+        {list.length === 0 && !error && <OnboardingOverlay />}
+
         {list.length === 0 && !error && (
           <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 text-center">
             <div className="space-y-2">
@@ -99,15 +106,23 @@ export default async function ScrapbookPage({
           <>
             <div className="flex items-center justify-between mb-4">
               <p className="text-xs text-muted-foreground">{list.length}점의 작품</p>
-              <Suspense fallback={null}>
-                <ScrapbookSortSelector current={sortKey} />
-              </Suspense>
+              <div className="flex items-center gap-2">
+                <Suspense fallback={null}>
+                  {viewMode === "grid" && <ScrapbookSortSelector current={sortKey} />}
+                  <ScrapbookViewToggle current={viewMode} />
+                </Suspense>
+              </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              {list.map((artwork) => (
-                <ArtworkCard key={artwork.id} artwork={artwork} />
-              ))}
-            </div>
+
+            {viewMode === "grid" ? (
+              <div className="grid grid-cols-2 gap-3">
+                {list.map((artwork) => (
+                  <ArtworkCard key={artwork.id} artwork={artwork} />
+                ))}
+              </div>
+            ) : (
+              <TimelineView artworks={list} />
+            )}
           </>
         )}
       </main>

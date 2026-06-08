@@ -10,14 +10,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { StarRating } from "@/components/StarRating";
+import { TagInput } from "@/components/TagInput";
 import type { ArtworkEntry } from "@/lib/types";
 import { ArrowLeft, Loader2, X } from "lucide-react";
 
 interface EditArtworkClientProps {
   artwork: ArtworkEntry;
+  existingTags?: string[];
 }
 
-export function EditArtworkClient({ artwork }: EditArtworkClientProps) {
+export function EditArtworkClient({ artwork, existingTags = [] }: EditArtworkClientProps) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,7 +33,7 @@ export function EditArtworkClient({ artwork }: EditArtworkClientProps) {
   const [visitDate, setVisitDate] = useState(artwork.visit_date ?? "");
   const [note, setNote] = useState(artwork.personal_note ?? "");
   const [rating, setRating] = useState<number | null>(artwork.rating ?? null);
-  const [tags, setTags] = useState(artwork.tags?.join(", ") ?? "");
+  const [tags, setTags] = useState<string[]>(artwork.tags ?? []);
   const [selectedType, setSelectedType] = useState<"original" | "cleaned">(
     artwork.selected_image_type ?? "original"
   );
@@ -52,10 +54,7 @@ export function EditArtworkClient({ artwork }: EditArtworkClientProps) {
     setError(null);
 
     const supabase = createClient();
-    const tagList = tags
-      .split(",")
-      .map((t) => t.trim())
-      .filter(Boolean);
+    const tagList = tags;
 
     const { error: updateError } = await supabase
       .from("artwork_entries")
@@ -236,12 +235,11 @@ export function EditArtworkClient({ artwork }: EditArtworkClientProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="tags">태그</Label>
-            <Input
-              id="tags"
-              placeholder="쉼표(,)로 구분"
+            <Label>태그</Label>
+            <TagInput
               value={tags}
-              onChange={(e) => setTags(e.target.value)}
+              onChange={setTags}
+              suggestions={existingTags}
             />
           </div>
 

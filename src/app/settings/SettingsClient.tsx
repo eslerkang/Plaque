@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { Profile } from "@/lib/types";
-import { Loader2, LogOut, User, BarChart2 } from "lucide-react";
+import { Loader2, LogOut, User, BarChart2, Download } from "lucide-react";
+import Link from "next/link";
 
 interface SettingsClientProps {
   profile: Profile | null;
@@ -137,6 +138,25 @@ export function SettingsClient({ profile, userEmail, artworkCount, galleryCount 
             <span>Plaque</span>
           </div>
         </div>
+      </section>
+
+      {/* Divider */}
+      <div className="h-px bg-border" />
+
+      {/* Export */}
+      <section className="space-y-3">
+        <h2 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
+          내보내기
+        </h2>
+        <Button asChild variant="outline" className="w-full gap-2">
+          <Link href="/scrapbook/export">
+            <Download className="h-4 w-4" />
+            컬렉션 PDF로 저장
+          </Link>
+        </Button>
+        <p className="text-xs text-muted-foreground">
+          모든 작품을 미술관 카탈로그 형식으로 내보냅니다
+        </p>
       </section>
 
       {/* Divider */}

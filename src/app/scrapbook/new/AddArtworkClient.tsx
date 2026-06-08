@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { StarRating } from "@/components/StarRating";
+import { TagInput } from "@/components/TagInput";
 import { ImageProcessor } from "@/components/ImageProcessor";
 import type { ProcessedImages, ImageProcessorHandle } from "@/components/ImageProcessor";
 import {
@@ -33,7 +34,7 @@ interface FormData {
   visit_date: string;
   personal_note: string;
   rating: number | null;
-  tags: string;
+  tags: string[];
 }
 
 const INITIAL_FORM: FormData = {
@@ -46,10 +47,16 @@ const INITIAL_FORM: FormData = {
   visit_date: "",
   personal_note: "",
   rating: null,
-  tags: "",
+  tags: [],
 };
 
-export function AddArtworkClient({ userId }: { userId: string }) {
+export function AddArtworkClient({
+  userId,
+  existingTags = [],
+}: {
+  userId: string;
+  existingTags?: string[];
+}) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const processorRef = useRef<ImageProcessorHandle>(null);
@@ -153,7 +160,7 @@ export function AddArtworkClient({ userId }: { userId: string }) {
         cleanedUrl = await uploadImage(processed.cleanedDataUrl, "cleaned");
       }
 
-      const tags = form.tags.split(",").map((t) => t.trim()).filter(Boolean);
+      const tags = form.tags;
 
       const { data, error: insertError } = await supabase
         .from("artwork_entries")
@@ -186,7 +193,7 @@ export function AddArtworkClient({ userId }: { userId: string }) {
     }
   }
 
-  function updateForm(key: keyof FormData, value: string | number | null) {
+  function updateForm(key: keyof FormData, value: string | number | null | string[]) {
     setForm((f) => ({ ...f, [key]: value }));
   }
 
@@ -561,14 +568,13 @@ export function AddArtworkClient({ userId }: { userId: string }) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="tags">태그</Label>
-              <Input
-                id="tags"
-                placeholder="예: 인상주의, 풍경화, 야경 (쉼표로 구분)"
+              <Label>태그</Label>
+              <TagInput
                 value={form.tags}
-                onChange={(e) => updateForm("tags", e.target.value)}
+                onChange={(tags) => updateForm("tags", tags)}
+                suggestions={existingTags}
+                placeholder="예: 인상주의, 풍경화"
               />
-              <p className="text-xs text-muted-foreground">여러 태그는 쉼표(,)로 구분하세요</p>
             </div>
 
             {error && <p className="text-sm text-destructive text-center">{error}</p>}
