@@ -1,0 +1,36 @@
+import { NextResponse, type NextRequest } from "next/server";
+
+export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // Supabase session cookie — @supabase/ssr stores it as sb-<ref>-auth-token
+  // (may be chunked as sb-<ref>-auth-token.0, .1, etc. for large tokens)
+  const hasSession = request.cookies
+    .getAll()
+    .some(
+      (c) => c.name.startsWith("sb-") && c.name.includes("-auth-token")
+    );
+
+  const protectedPaths = ["/scrapbook", "/search", "/settings"];
+  const isProtected = protectedPaths.some((p) => pathname.startsWith(p));
+
+  if (!hasSession && isProtected) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    return NextResponse.redirect(url);
+  }
+
+  if (hasSession && pathname === "/login") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/scrapbook";
+    return NextResponse.redirect(url);
+  }
+
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+  ],
+};

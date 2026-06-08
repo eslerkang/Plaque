@@ -1,0 +1,37 @@
+import type { Metadata, Viewport } from "next";
+import "./globals.css";
+
+export const metadata: Metadata = {
+  title: "Plaque — 나만의 미술관 스크랩북",
+  description: "방문한 작품을 기록하고, 감상을 남기고, 나만의 미술관을 만들어보세요.",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Plaque",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  themeColor: "#faf9f7",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="ko" className="h-full">
+      <body className="h-full bg-background text-foreground antialiased">
+        {children}
+      </body>
+    </html>
+  );
+}
