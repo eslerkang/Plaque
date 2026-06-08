@@ -32,9 +32,13 @@ export default async function LoginPage({
         <LoginForm error={error} />
 
         <p className="text-center text-xs text-muted-foreground">
-          로그인하면{" "}
-          <span className="underline underline-offset-2">이용약관</span>에
-          동의한 것으로 간주됩니다.
+          <Link href="/terms" className="underline underline-offset-2 hover:text-foreground transition-colors">
+            이용약관
+          </Link>
+          {" "}및{" "}
+          <Link href="/privacy" className="underline underline-offset-2 hover:text-foreground transition-colors">
+            개인정보처리방침
+          </Link>
         </p>
       </div>
     </main>
