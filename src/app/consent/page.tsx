@@ -14,18 +14,15 @@ export default async function ConsentPage() {
   // Not logged in → send to login
   if (!user) redirect("/login");
 
-  // If already consented, the restore-consent route handler will have set the cookie.
-  // If the user somehow lands here with terms_accepted_at already set, send them back
-  // through the handler so the cookie is reliably written.
   const { data: profile } = await supabase
     .from("profiles")
     .select("terms_accepted_at")
     .eq("id", user.id)
     .single();
 
-  if (profile?.terms_accepted_at) {
-    redirect("/api/restore-consent");
-  }
+  // If already consented in DB, ConsentClient will auto-restore the cookie via
+  // Server Action (which reliably sets Set-Cookie) and redirect to /scrapbook.
+  const hasAccepted = !!profile?.terms_accepted_at;
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center px-6 bg-background">
@@ -47,7 +44,7 @@ export default async function ConsentPage() {
         </div>
 
         {/* Consent form */}
-        <ConsentClient />
+        <ConsentClient hasAccepted={hasAccepted} />
       </div>
     </main>
   );

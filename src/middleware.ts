@@ -24,13 +24,10 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // 2. Authenticated but no consent → restore-consent handler (checks DB, sets cookie if
-  //    already consented, otherwise shows consent page). Using a Route Handler instead of
-  //    redirecting directly to /consent guarantees Set-Cookie is sent reliably on all browsers.
+  // 2. Authenticated but no consent → consent page (only for protected routes)
   if (hasSession && !hasConsent && isProtected) {
     const url = request.nextUrl.clone();
-    url.pathname = "/api/restore-consent";
-    url.searchParams.set("next", pathname);
+    url.pathname = "/consent";
     return NextResponse.redirect(url);
   }
 
