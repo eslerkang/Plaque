@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { ConsentClient } from "./ConsentClient";
-import { CONSENT_COOKIE, CONSENT_COOKIE_OPTS } from "./actions";
+import { CONSENT_COOKIE, CONSENT_COOKIE_OPTS } from "./constants";
 
 export const metadata = { title: "서비스 동의 | Plaque" };
 

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next";
 import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
 import { LocaleProvider } from "@/components/LocaleProvider";
 import { getLocale } from "@/lib/i18n/server";
@@ -38,6 +39,7 @@ export default async function RootLayout({
         <LocaleProvider locale={locale}>
           {children}
         </LocaleProvider>
+        <Analytics />
       </body>
     </html>
   );

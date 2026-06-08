@@ -2,17 +2,10 @@
 
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
-
-export const CONSENT_COOKIE = "plaque_terms";
-export const CONSENT_COOKIE_OPTS = {
-  maxAge: 60 * 60 * 24 * 365, // 1 year
-  path: "/",
-  httpOnly: true,
-  sameSite: "lax" as const,
-};
+import { CONSENT_COOKIE, CONSENT_COOKIE_OPTS } from "./constants";
 
 /**
- * Record consent in DB + set the `plaque_terms` cookie on the response.
+ * Record consent in DB + set the `plaque_terms` cookie.
  * Called by ConsentClient after the user checks both boxes and submits.
  */
 export async function acceptTerms() {
