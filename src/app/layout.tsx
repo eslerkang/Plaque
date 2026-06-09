@@ -6,6 +6,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
 import { LocaleProvider } from "@/components/LocaleProvider";
 import { getLocale } from "@/lib/i18n/server";
+import { t } from "@/lib/i18n";
 
 /**
  * Display / heading font — 나눔명조 (Nanum Myeongjo)
@@ -35,45 +36,52 @@ const notoSansKR = Noto_Sans_KR({
   preload: false,
 });
 
-export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://art-plaque.kro.kr"
-  ),
-  title: "Plaque — 나만의 미술관 스크랩북",
-  description: "방문한 작품을 기록하고, 감상을 남기고, 나만의 미술관을 만들어보세요.",
-  manifest: "/manifest.json",
-  icons: {
-    icon: [
-      { url: "/favicon.ico", sizes: "48x48", type: "image/x-icon" },
-      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
-      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
-    ],
-    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
-  },
-  openGraph: {
-    title: "Plaque — 나만의 미술관 스크랩북",
-    description: "방문한 작품을 기록하고, 감상을 남기고, 나만의 미술관을 만들어보세요.",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Plaque — 나만의 미술관 스크랩북",
-    description: "방문한 작품을 기록하고, 감상을 남기고, 나만의 미술관을 만들어보세요.",
-    images: ["/og-image.png"],
-  },
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "black-translucent",
-    title: "Plaque",
-  },
-  formatDetection: {
-    telephone: false,
-  },
-  verification: {
-    google: "33Pzuk1zCu6XzizFN_WJb8a3aVv_FG5cuOfj9oacUOQ",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const ogImage = locale === "en" ? "/og-image-en.png" : "/og-image.png";
+  const title = `Plaque — ${t("landing.subline", locale)}`;
+  const description = t("landing.body1", locale).replace(/\n/g, " ");
+
+  return {
+    metadataBase: new URL(
+      process.env.NEXT_PUBLIC_SITE_URL ?? "https://art-plaque.kro.kr"
+    ),
+    title,
+    description,
+    manifest: "/manifest.json",
+    icons: {
+      icon: [
+        { url: "/favicon.ico", sizes: "48x48", type: "image/x-icon" },
+        { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+        { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+      ],
+      apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
+    },
+    openGraph: {
+      title,
+      description,
+      images: [{ url: ogImage, width: 1200, height: 630 }],
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [ogImage],
+    },
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: "black-translucent",
+      title: "Plaque",
+    },
+    formatDetection: {
+      telephone: false,
+    },
+    verification: {
+      google: "33Pzuk1zCu6XzizFN_WJb8a3aVv_FG5cuOfj9oacUOQ",
+    },
+  };
+}
 
 export const viewport: Viewport = {
   width: "device-width",
