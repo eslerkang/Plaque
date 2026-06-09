@@ -36,6 +36,9 @@ const notoSansKR = Noto_Sans_KR({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://art-plaque.kro.kr"
+  ),
   title: "Plaque — 나만의 미술관 스크랩북",
   description: "방문한 작품을 기록하고, 감상을 남기고, 나만의 미술관을 만들어보세요.",
   manifest: "/manifest.json",
