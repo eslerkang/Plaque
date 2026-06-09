@@ -7,6 +7,7 @@ import { ArtworkCard } from "@/components/ArtworkCard";
 import type { ArtworkWithUrls } from "@/lib/types";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { useTranslation } from "@/components/LocaleProvider";
+import { matchesQuery, artworkSearchText, scoreArtwork } from "@/lib/search";
 
 interface SearchClientProps {
   artworks: ArtworkWithUrls[];
@@ -37,27 +38,22 @@ export function SearchClient({ artworks }: SearchClientProps) {
     return Array.from(tags).sort();
   }, [artworks]);
 
-  // Filter logic
+  // Filter + sort by relevance
   const results = useMemo(() => {
-    const q = filters.query.toLowerCase().trim();
-    return artworks.filter((a) => {
-      if (q) {
-        const searchable = [
-          a.title,
-          a.artist_name,
-          a.gallery_name,
-          a.exhibition_title,
-          a.tags?.join(" "),
-        ]
-          .filter(Boolean)
-          .join(" ")
-          .toLowerCase();
-        if (!searchable.includes(q)) return false;
-      }
+    const q = filters.query.trim();
+    const filtered = artworks.filter((a) => {
+      if (q && !matchesQuery(artworkSearchText(a), q)) return false;
       if (filters.rating && a.rating !== filters.rating) return false;
       if (filters.tag && !a.tags?.includes(filters.tag)) return false;
       return true;
     });
+
+    // Sort by relevance when there's an active query
+    if (q) {
+      filtered.sort((a, b) => scoreArtwork(b, q) - scoreArtwork(a, q));
+    }
+
+    return filtered;
   }, [artworks, filters]);
 
   const hasFilters = filters.query || filters.rating || filters.tag;
