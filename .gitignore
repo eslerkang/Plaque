@@ -28,10 +28,11 @@
 **/.DS_Store
 *.pem
 
-# internal documents (design guides, specs — not for public repos)
+# internal documents (design guides, specs, AI coding instructions — not for public repos)
 DESIGN_GUIDE.html
 DESIGN_GUIDE*.html
 *.design-guide.*
+CLAUDE.md
 
 # temp scaffold dir (safe to delete manually)
 /tmp-init/

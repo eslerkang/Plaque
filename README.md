@@ -1,118 +1,27 @@
-# Plaque — 나만의 미술관 스크랩북
+# Plaque
 
-A mobile-first art journal and scrapbook for museum and gallery visitors. Built with Next.js 16, Supabase, and OpenCV.js.
+**나만의 미술관 스크랩북** — 전시장에서 만난 작품을 사진으로 기록하고, 감상과 평점을 남기는 개인 아카이브 앱.
 
-## Features
+---
 
-- **Photo capture** — shoot or upload artwork photos directly from the app
-- **Perspective correction** — OpenCV.js detects artwork edges and corrects perspective (no AI APIs)
-- **Museum catalog cards** — each saved artwork displayed as a clean catalog entry
-- **Full metadata** — title, artist, year, medium, gallery, exhibition, visit date, rating (1–5 stars), tags, personal note
-- **Search & filter** — by text, rating, and tag
-- **Google OAuth** — via Supabase Auth
+## 주요 기능
 
-## Tech Stack
+- 작품 사진 촬영 및 원근 보정 (OpenCV.js, 브라우저 전용 — AI API 없음)
+- 제목, 작가, 연도, 재료, 전시·갤러리, 방문일, 평점, 태그, 감상 메모 기록
+- 그리드 / 타임라인 뷰 전환, 날짜·평점순 정렬
+- 작품명·작가·갤러리 전문 검색 + 태그·평점 필터
+- 컬렉션 PDF 내보내기 (미술관 카탈로그 형식)
+- Google 계정 로그인, 멀티 디바이스 동기화
 
-- **Next.js 16** (App Router, TypeScript)
-- **Tailwind CSS v4**
-- **Supabase** (Auth, Postgres, Storage)
-- **OpenCV.js 4.8** (client-side image processing — no AI)
+## 기술
 
-## Setup
+Next.js · TypeScript · Tailwind CSS · Supabase · OpenCV.js · Vercel
 
-### 1. Create a Supabase project
+## 약관
 
-Go to [supabase.com](https://supabase.com) and create a new project.
+- [이용약관](https://plaque.vercel.app/terms)
+- [개인정보처리방침](https://plaque.vercel.app/privacy)
 
-### 2. Run the migration
+---
 
-In Supabase Dashboard → SQL Editor, paste and run:
-
-```
-supabase/migrations/001_initial.sql
-```
-
-This creates the `profiles` and `artwork_entries` tables, RLS policies, triggers, and storage bucket.
-
-### 3. Enable Google OAuth
-
-Supabase Dashboard → Authentication → Providers → Google:
-- Enable Google provider
-- Add Google OAuth credentials (Client ID + Secret from Google Cloud Console)
-- Set redirect URL: `https://<your-domain>/auth/callback`
-
-### 4. Set environment variables
-
-```bash
-cp .env.example .env.local
-```
-
-Fill in `.env.local`:
-
-```
-NEXT_PUBLIC_SUPABASE_URL=https://<project-ref>.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=<your-anon-key>
-```
-
-Find these in: Supabase Dashboard → Project Settings → API
-
-### 5. Install and run
-
-```bash
-npm install
-npm run dev
-```
-
-### 6. Deploy to Vercel
-
-```bash
-npx vercel
-```
-
-Add environment variables in Vercel project settings.  
-Add your Vercel URL to Supabase Auth → URL Configuration → Redirect URLs.
-
-## Project Structure
-
-```
-src/
-  app/
-    page.tsx                  Landing page
-    login/                    Login + Google OAuth
-    auth/callback/            OAuth callback route
-    scrapbook/
-      page.tsx                Catalog grid view
-      new/                    Add artwork (3-step flow)
-      [id]/page.tsx           Artwork detail
-      [id]/edit/              Edit artwork
-    search/                   Search + tag/rating filters
-    settings/                 Profile + sign out
-  components/
-    ArtworkCard.tsx           Museum catalog card
-    BottomNav.tsx             Mobile bottom navigation
-    ImageProcessor.tsx        OpenCV.js perspective correction
-    StarRating.tsx            Interactive star rating
-    AIFeaturePlaceholder.tsx  Disabled AI buttons + coming-soon modal
-    ui/                       Button, Input, Label, Textarea, Badge, Dialog
-  lib/
-    supabase/                 Browser + server Supabase clients
-    types.ts                  TypeScript types (Profile, ArtworkEntry)
-    utils.ts                  cn(), formatDate()
-  middleware.ts               Route protection
-supabase/
-  migrations/001_initial.sql  Full schema + RLS + storage policies
-```
-
-## Image Processing (no AI)
-
-OpenCV.js runs entirely in the browser:
-
-1. Upload → drawn to off-screen canvas (capped at 1600px)
-2. Gaussian blur + Canny edge detection + dilation
-3. Contour detection → quadrilateral approximation
-4. Largest rectangular contour = artwork boundary
-5. Perspective transform → cropped, deskewed image
-6. Both original and cleaned images uploaded to Supabase Storage
-7. User picks which version to display; both always preserved
-
-Low-confidence or failed detections fall back to original with an explanatory message.
+© 2025 Plaque
