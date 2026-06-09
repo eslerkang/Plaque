@@ -29,7 +29,7 @@ export const translations = {
     "login.subtitle": "나만의 미술관",
     "login.google": "Google로 계속하기",
     "login.loading": "로그인 중...",
-    "login.error": "로그인에 실패했습니다. 다시 시도해 주세요.",
+    "login.error": "로그인 오류가 발생했습니다. 다시 시도해 주세요.",
 
     // ── Consent ──────────────────────────────────────────────────────────────
     "consent.title": "서비스 이용 동의",
@@ -236,7 +236,7 @@ export const translations = {
     "login.subtitle": "Your Personal Museum",
     "login.google": "Continue with Google",
     "login.loading": "Signing in...",
-    "login.error": "Sign-in failed. Please try again.",
+    "login.error": "Sign-in error. Please try again.",
 
     // ── Consent ──────────────────────────────────────────────────────────────
     "consent.title": "Terms Agreement",
