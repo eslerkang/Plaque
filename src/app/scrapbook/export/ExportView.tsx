@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Printer } from "lucide-react";
+import { ArrowLeft, Download, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
 import type { ArtworkWithUrls } from "@/lib/types";
@@ -31,16 +31,7 @@ function RatingDots({ value }: { value: number }) {
 }
 
 export function ExportView({ artworks }: ExportViewProps) {
-
-  useEffect(() => {
-    // Small delay so images can load before print dialog
-    const timer = setTimeout(() => {}, 500);
-    return () => clearTimeout(timer);
-  }, []);
-
-  function handlePrint() {
-    window.print();
-  }
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const today = new Date().toLocaleDateString("ko-KR", {
     year: "numeric",
@@ -48,9 +39,107 @@ export function ExportView({ artworks }: ExportViewProps) {
     day: "numeric",
   });
 
+  async function handleDownloadPDF() {
+    setIsGenerating(true);
+    try {
+      const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
+        import("html2canvas"),
+        import("jspdf"),
+      ]);
+
+      const element = document.getElementById("export-content");
+      if (!element) throw new Error("Export element not found");
+
+      // Wait for all images to fully load
+      const images = Array.from(element.querySelectorAll("img"));
+      await Promise.all(
+        images.map(
+          (img) =>
+            img.complete
+              ? Promise.resolve()
+              : new Promise<void>((resolve) => {
+                  img.onload = () => resolve();
+                  img.onerror = () => resolve(); // don't block on failed images
+                })
+        )
+      );
+
+      // Capture the full document at 2× scale for retina quality
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: false,
+        backgroundColor: "#faf9f7",
+        logging: false,
+        scrollX: 0,
+        scrollY: -window.scrollY,
+        width: element.scrollWidth,
+        height: element.scrollHeight,
+        windowWidth: element.scrollWidth,
+        windowHeight: element.scrollHeight,
+      });
+
+      // A4 in mm
+      const PAGE_W_MM = 210;
+      const PAGE_H_MM = 297;
+
+      // mm per canvas-pixel (at scale=2, canvas.width = element.scrollWidth * 2)
+      const mmPerPx = PAGE_W_MM / canvas.width;
+      const totalHeightMm = canvas.height * mmPerPx;
+
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+        compress: true,
+      });
+
+      let remainingMm = totalHeightMm;
+      let srcYPx = 0;
+
+      while (remainingMm > 0) {
+        const sliceMm = Math.min(PAGE_H_MM, remainingMm);
+        const slicePx = Math.round(sliceMm / mmPerPx);
+
+        // Slice the canvas for this page
+        const slice = document.createElement("canvas");
+        slice.width = canvas.width;
+        slice.height = slicePx;
+        const ctx = slice.getContext("2d");
+        if (ctx) {
+          ctx.fillStyle = "#faf9f7";
+          ctx.fillRect(0, 0, slice.width, slice.height);
+          ctx.drawImage(canvas, 0, srcYPx, canvas.width, slicePx, 0, 0, canvas.width, slicePx);
+        }
+
+        if (srcYPx > 0) pdf.addPage();
+        pdf.addImage(
+          slice.toDataURL("image/jpeg", 0.92),
+          "JPEG",
+          0,
+          0,
+          PAGE_W_MM,
+          sliceMm
+        );
+
+        srcYPx += slicePx;
+        remainingMm -= sliceMm;
+      }
+
+      const filename = `plaque-collection-${new Date().toISOString().split("T")[0]}.pdf`;
+      pdf.save(filename);
+    } catch (err) {
+      console.error("PDF generation failed:", err);
+      // Fallback: browser print
+      window.print();
+    } finally {
+      setIsGenerating(false);
+    }
+  }
+
   return (
     <>
-      {/* Screen-only controls */}
+      {/* Top bar (screen only) */}
       <div className="print:hidden sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur-sm">
         <div className="flex items-center justify-between px-4 h-14 max-w-2xl mx-auto">
           <Link
@@ -60,181 +149,218 @@ export function ExportView({ artworks }: ExportViewProps) {
             <ArrowLeft className="h-4 w-4" />
             스크랩북
           </Link>
-          <Button onClick={handlePrint} size="sm" className="gap-2">
-            <Printer className="h-4 w-4" />
-            PDF로 저장
+          <Button
+            onClick={handleDownloadPDF}
+            size="sm"
+            className="gap-2"
+            disabled={isGenerating}
+          >
+            {isGenerating ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                생성 중...
+              </>
+            ) : (
+              <>
+                <Download className="h-4 w-4" />
+                PDF로 저장
+              </>
+            )}
           </Button>
         </div>
       </div>
 
-      {/* Print document */}
+      {/* Document — captured by html2canvas */}
       <div
-        className="max-w-2xl mx-auto px-6 py-8 print:max-w-none print:px-0 print:py-0"
-        style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
+        id="export-content"
+        style={{
+          fontFamily: "Georgia, 'Times New Roman', serif",
+          backgroundColor: "#faf9f7",
+          color: "#1a1917",
+          maxWidth: 740,
+          margin: "0 auto",
+          padding: "40px 48px",
+        }}
       >
         {/* Cover */}
-        <div
-          className="print:h-screen print:flex print:flex-col print:justify-between"
-          style={{ paddingBottom: "3rem" }}
-        >
-          <div
+        <div style={{ paddingBottom: "3rem", marginBottom: "3rem" }}>
+          <p
             style={{
-              borderBottom: "2px solid #1a1917",
-              paddingBottom: "1.5rem",
-              marginBottom: "2rem",
+              fontSize: "0.65rem",
+              letterSpacing: "0.2em",
+              textTransform: "uppercase",
+              color: "#6b6560",
+              marginBottom: "0.5rem",
+              fontFamily: "'Helvetica Neue', Arial, sans-serif",
             }}
           >
-            <p
-              style={{
-                fontSize: "0.7rem",
-                letterSpacing: "0.2em",
-                textTransform: "uppercase",
-                color: "#6b6560",
-                marginBottom: "0.5rem",
-              }}
-            >
-              Personal Archive
-            </p>
-            <h1 style={{ fontSize: "2.5rem", fontWeight: "bold", margin: 0 }}>
-              Plaque
-            </h1>
-            <p style={{ fontSize: "1rem", color: "#6b6560", marginTop: "0.25rem" }}>
-              나만의 미술관 컬렉션
-            </p>
-          </div>
-
-          <div style={{ color: "#6b6560", fontSize: "0.875rem" }}>
-            <p>총 {artworks.length}점의 작품</p>
-            <p>{today} 기준</p>
-          </div>
+            Personal Archive
+          </p>
+          <h1
+            style={{
+              fontSize: "2.5rem",
+              fontWeight: "bold",
+              margin: "0 0 0.25rem",
+              fontFamily: "'Helvetica Neue', Arial, sans-serif",
+            }}
+          >
+            Plaque
+          </h1>
+          <p
+            style={{
+              fontSize: "1rem",
+              color: "#6b6560",
+              margin: "0 0 1.5rem",
+              fontFamily: "'Helvetica Neue', Arial, sans-serif",
+            }}
+          >
+            나만의 미술관 컬렉션
+          </p>
+          <div style={{ borderBottom: "2px solid #1a1917", marginBottom: "1.5rem" }} />
+          <p style={{ fontSize: "0.875rem", color: "#6b6560", margin: 0 }}>
+            총 {artworks.length}점의 작품 &nbsp;·&nbsp; {today}
+          </p>
         </div>
 
         {/* Artwork entries */}
-        <div>
-          {artworks.map((artwork, index) => {
-            const imgUrl = artwork.displayUrl;
-
-            return (
-              <div
-                key={artwork.id}
+        {artworks.map((artwork, index) => (
+          <div
+            key={artwork.id}
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "2.5rem",
+              padding: "2.5rem 0",
+              borderTop: "1px solid #e3ddd5",
+            }}
+          >
+            {/* Image */}
+            <div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={artwork.displayUrl}
+                alt={artwork.title}
+                crossOrigin="anonymous"
                 style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "2rem",
-                  padding: "2rem 0",
-                  borderTop: "1px solid #e3ddd5",
-                  pageBreakInside: "avoid",
-                  breakInside: "avoid",
+                  width: "100%",
+                  aspectRatio: "4/3",
+                  objectFit: "contain",
+                  backgroundColor: "#f0ece6",
+                  display: "block",
+                }}
+              />
+              <p
+                style={{
+                  fontSize: "0.65rem",
+                  color: "#6b6560",
+                  marginTop: "0.375rem",
+                  textAlign: "center",
+                  fontFamily: "'Helvetica Neue', Arial, sans-serif",
                 }}
               >
-                {/* Image */}
-                <div>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={imgUrl}
-                    alt={artwork.title}
-                    style={{
-                      width: "100%",
-                      aspectRatio: "4/3",
-                      objectFit: "contain",
-                      backgroundColor: "#f0ece6",
-                      display: "block",
-                    }}
-                  />
-                  <p
-                    style={{
-                      fontSize: "0.65rem",
-                      color: "#6b6560",
-                      marginTop: "0.375rem",
-                      textAlign: "center",
-                    }}
-                  >
-                    {index + 1}
-                  </p>
+                {index + 1}
+              </p>
+            </div>
+
+            {/* Metadata */}
+            <div style={{ paddingTop: "0.25rem" }}>
+              <h2
+                style={{
+                  fontSize: "1.1rem",
+                  fontWeight: "bold",
+                  margin: "0 0 0.25rem",
+                  lineHeight: 1.3,
+                }}
+              >
+                {artwork.title}
+              </h2>
+
+              {artwork.artist_name && (
+                <p
+                  style={{
+                    fontSize: "0.875rem",
+                    color: "#6b6560",
+                    margin: "0 0 1rem",
+                    fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                  }}
+                >
+                  {artwork.artist_name}
+                </p>
+              )}
+
+              {artwork.rating && (
+                <div style={{ marginBottom: "1rem" }}>
+                  <RatingDots value={artwork.rating} />
                 </div>
+              )}
 
-                {/* Metadata */}
-                <div style={{ paddingTop: "0.25rem" }}>
-                  <h2
-                    style={{
-                      fontSize: "1.1rem",
-                      fontWeight: "bold",
-                      margin: "0 0 0.25rem",
-                      lineHeight: 1.3,
-                    }}
-                  >
-                    {artwork.title}
-                  </h2>
-                  {artwork.artist_name && (
-                    <p style={{ fontSize: "0.875rem", color: "#6b6560", margin: "0 0 1rem" }}>
-                      {artwork.artist_name}
-                    </p>
-                  )}
-
-                  {artwork.rating && (
-                    <div style={{ marginBottom: "1rem" }}>
-                      <RatingDots value={artwork.rating} />
+              <dl
+                style={{
+                  fontSize: "0.75rem",
+                  margin: "0 0 0.75rem",
+                  fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                }}
+              >
+                {(
+                  [
+                    ["제작 연도", artwork.year],
+                    ["재료/기법", artwork.medium],
+                    ["장소", artwork.gallery_name],
+                    ["전시", artwork.exhibition_title],
+                    [
+                      "방문일",
+                      artwork.visit_date ? formatDate(artwork.visit_date) : null,
+                    ],
+                  ] as [string, string | null | undefined][]
+                )
+                  .filter(([, v]) => v)
+                  .map(([label, value]) => (
+                    <div
+                      key={label}
+                      style={{
+                        display: "flex",
+                        gap: "0.75rem",
+                        marginBottom: "0.375rem",
+                      }}
+                    >
+                      <dt style={{ color: "#6b6560", flexShrink: 0, width: "4.5rem" }}>
+                        {label}
+                      </dt>
+                      <dd style={{ margin: 0 }}>{value}</dd>
                     </div>
-                  )}
+                  ))}
+              </dl>
 
-                  <dl style={{ fontSize: "0.75rem", margin: 0 }}>
-                    {[
-                      ["제작 연도", artwork.year],
-                      ["재료/기법", artwork.medium],
-                      ["장소", artwork.gallery_name],
-                      ["전시", artwork.exhibition_title],
-                      ["방문일", artwork.visit_date ? formatDate(artwork.visit_date) : null],
-                    ]
-                      .filter(([, v]) => v)
-                      .map(([label, value]) => (
-                        <div
-                          key={label as string}
-                          style={{
-                            display: "flex",
-                            gap: "0.75rem",
-                            marginBottom: "0.375rem",
-                          }}
-                        >
-                          <dt style={{ color: "#6b6560", flexShrink: 0, width: "4.5rem" }}>
-                            {label}
-                          </dt>
-                          <dd style={{ margin: 0 }}>{value}</dd>
-                        </div>
-                      ))}
-                  </dl>
+              {artwork.tags && artwork.tags.length > 0 && (
+                <p
+                  style={{
+                    fontSize: "0.7rem",
+                    color: "#6b6560",
+                    margin: "0 0 0.75rem",
+                    fontFamily: "'Helvetica Neue', Arial, sans-serif",
+                  }}
+                >
+                  {artwork.tags.map((t) => `#${t}`).join("  ")}
+                </p>
+              )}
 
-                  {artwork.tags && artwork.tags.length > 0 && (
-                    <p
-                      style={{
-                        fontSize: "0.7rem",
-                        color: "#6b6560",
-                        marginTop: "0.75rem",
-                      }}
-                    >
-                      {artwork.tags.map((t) => `#${t}`).join("  ")}
-                    </p>
-                  )}
-
-                  {artwork.personal_note && (
-                    <p
-                      style={{
-                        fontSize: "0.75rem",
-                        color: "#1a1917",
-                        marginTop: "0.75rem",
-                        lineHeight: 1.6,
-                        borderLeft: "2px solid #c9b99a",
-                        paddingLeft: "0.75rem",
-                        fontStyle: "italic",
-                      }}
-                    >
-                      {artwork.personal_note}
-                    </p>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+              {artwork.personal_note && (
+                <p
+                  style={{
+                    fontSize: "0.75rem",
+                    lineHeight: 1.6,
+                    borderLeft: "2px solid #c9b99a",
+                    paddingLeft: "0.75rem",
+                    fontStyle: "italic",
+                    margin: 0,
+                  }}
+                >
+                  {artwork.personal_note}
+                </p>
+              )}
+            </div>
+          </div>
+        ))}
 
         {/* Footer */}
         <div
@@ -246,6 +372,7 @@ export function ExportView({ artworks }: ExportViewProps) {
             color: "#6b6560",
             display: "flex",
             justifyContent: "space-between",
+            fontFamily: "'Helvetica Neue', Arial, sans-serif",
           }}
         >
           <span>Plaque — 나만의 미술관</span>
