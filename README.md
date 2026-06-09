@@ -19,8 +19,8 @@ Next.js · TypeScript · Tailwind CSS · Supabase · OpenCV.js · Vercel
 
 ## 약관
 
-- [이용약관](https://plaque.vercel.app/terms)
-- [개인정보처리방침](https://plaque.vercel.app/privacy)
+- [이용약관](https://art-plaque.kro.kr/terms)
+- [개인정보처리방침](https://art-plaque.kro.kr/privacy)
 
 ---
 
