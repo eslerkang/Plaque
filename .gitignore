@@ -1,5 +1,3 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
 # dependencies
 /node_modules
 /.pnp
@@ -10,12 +8,6 @@
 !.yarn/releases
 !.yarn/versions
 
-# testing
-/coverage
-/playwright-report
-/test-results
-/e2e/auth-state/
-
 # next.js
 /.next/
 /out/
@@ -23,35 +15,50 @@
 # production
 /build
 
-# misc
-.DS_Store
-**/.DS_Store
-*.pem
-
-# internal documents (design guides, specs, AI coding instructions — not for public repos)
-DESIGN_GUIDE.html
-DESIGN_GUIDE*.html
-*.design-guide.*
-CLAUDE.md
-
-# temp scaffold dir (safe to delete manually)
-/tmp-init/
-
-# typescript build info
-*.tsbuildinfo
-
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-
-# env files (can opt-in for committing if needed)
+# env files
 .env*
 
 # vercel
 .vercel
 
-# typescript
+# typescript build info
 *.tsbuildinfo
 next-env.d.ts
+
+# misc
+.DS_Store
+**/.DS_Store
+*.pem
+
+# ── Internal — never commit ───────────────────────────────────────────────────
+
+# AI coding assistant instructions
+CLAUDE.md
+
+# Internal design/spec documents
+DESIGN_GUIDE*.html
+*.design-guide.*
+
+# Database schema, RLS policies, storage config — internal infrastructure
+/supabase/
+
+# Test suites and configuration — internal development tooling
+/e2e/
+/src/__tests__/
+jest.config.ts
+jest.setup.ts
+playwright.config.ts
+
+# Build/test artifact output
+/coverage
+/playwright-report
+/test-results
+/e2e/auth-state/
+
+# Temp/scratch files
+/tmp-init/
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*

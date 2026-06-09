@@ -13,21 +13,25 @@ set -euo pipefail
 ERRORS=()
 STAGED=$(git diff --cached --name-only --diff-filter=ACM 2>/dev/null || true)
 
-# ── 1. Forbidden file patterns ───────────────────────────────────────────────
-# Internal design docs, specs, and similar files should never be committed.
+# ── 1. Forbidden file/directory patterns ─────────────────────────────────────
 BLOCKED_PATTERNS=(
-  "DESIGN_GUIDE"
+  "^CLAUDE\.md$"
+  "^DESIGN_GUIDE"
   "DESIGN_SPEC"
   "INTERNAL_"
   "\.design-guide\."
-  "\.spec\.html$"
+  "^supabase/"
+  "^e2e/"
+  "^src/__tests__/"
+  "^jest\.(config|setup)\."
+  "^playwright\.config\."
 )
 
 for pat in "${BLOCKED_PATTERNS[@]}"; do
   while IFS= read -r f; do
     [[ -z "$f" ]] && continue
-    if echo "$f" | grep -qiE "$pat"; then
-      ERRORS+=("Internal document staged: $f — add to .gitignore instead")
+    if echo "$f" | grep -qE "$pat"; then
+      ERRORS+=("Internal file staged: $f — this path is gitignored for a reason")
     fi
   done <<< "$STAGED"
 done
@@ -40,22 +44,33 @@ while IFS= read -r f; do
   fi
 done <<< "$STAGED"
 
-# ── 3. Scan staged diff for hardcoded secrets ────────────────────────────────
+# ── 3. Stray scratch files in repo root ──────────────────────────────────────
+while IFS= read -r f; do
+  [[ -z "$f" ]] && continue
+  if echo "$f" | grep -qE '^[^/]+\.(ts|tsx|js|jsx|py|sh)$'; then
+    # Allow known legitimate root-level files
+    case "$f" in
+      eslint.config.*|next.config.*|postcss.config.*|tailwind.config.*|tsconfig*.json|jest.config.*|playwright.config.*)
+        ;;
+      *)
+        ERRORS+=("Unexpected root-level script staged: $f — likely a scratch/test file")
+        ;;
+    esac
+  fi
+done <<< "$STAGED"
+
+# ── 4. Scan staged diff for hardcoded secrets ────────────────────────────────
 DIFF=$(git diff --cached -U0 2>/dev/null | grep '^+' | grep -v '^+++' || true)
 
-# Real Supabase project URL (ref is 20 lowercase alphanumeric chars, no < > brackets)
-# Placeholders like https://<project-ref>.supabase.co are allowed.
+# Real Supabase project URL (ref is 15-25 lowercase alphanumeric chars, no < > placeholders)
 if echo "$DIFF" | grep -qE 'https://[a-z0-9]{15,25}\.supabase\.co'; then
   HITS=$(echo "$DIFF" | grep -E 'https://[a-z0-9]{15,25}\.supabase\.co' | grep -v '<' || true)
   if [[ -n "$HITS" ]]; then
-    ERRORS+=("Hardcoded Supabase project URL in staged diff — use a placeholder in docs (e.g. https://<project-ref>.supabase.co)")
+    ERRORS+=("Hardcoded Supabase project URL in staged diff — use a placeholder in docs")
   fi
 fi
 
-# Real Supabase JWT (anon/service key).
-# Structure: <header>.<payload>.<signature>
-# HMAC-SHA256 signatures are exactly 43 base64url chars.
-# Test/fake JWTs use a readable string as the signature (< 43 chars or contains words).
+# Real Supabase JWT (anon/service key) — HMAC-SHA256 signatures are exactly 43 base64url chars
 if echo "$DIFF" | grep -qE 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.[A-Za-z0-9_-]{100,}\.[A-Za-z0-9_-]{43}[^A-Za-z0-9_-]'; then
   ERRORS+=("Possible real Supabase JWT (anon/service key) in staged diff — store in .env.local only")
 fi
