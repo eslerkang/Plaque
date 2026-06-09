@@ -12,7 +12,7 @@ export function BottomNav() {
 
   const navItems = [
     { href: "/scrapbook", label: t("nav.scrapbook"), icon: BookOpen },
-    { href: "/scrapbook/new", label: t("add.step.upload"), icon: PlusCircle },
+    { href: "/scrapbook/new", label: t("nav.add"), icon: PlusCircle },
     { href: "/search", label: t("nav.search"), icon: Search },
     { href: "/settings", label: t("nav.settings"), icon: Settings },
   ];

@@ -2,9 +2,12 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { SettingsClient } from "./SettingsClient";
 import type { Profile } from "@/lib/types";
+import { getLocale } from "@/lib/i18n/server";
+import { t } from "@/lib/i18n";
 
 export default async function SettingsPage() {
   const supabase = await createClient();
+  const locale = await getLocale();
 
   const {
     data: { user },
@@ -29,7 +32,7 @@ export default async function SettingsPage() {
     <div className="flex flex-col min-h-full">
       <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur-sm">
         <div className="flex items-center px-4 h-14 max-w-lg mx-auto">
-          <h1 className="font-semibold text-base">설정</h1>
+          <h1 className="font-semibold text-base">{t("settings.title", locale)}</h1>
         </div>
       </header>
       <main className="flex-1 px-4 py-6 max-w-lg mx-auto w-full">

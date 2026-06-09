@@ -11,6 +11,7 @@ export const translations = {
 
     // ── BottomNav ────────────────────────────────────────────────────────────
     "nav.scrapbook": "스크랩북",
+    "nav.add": "추가",
     "nav.search": "검색",
     "nav.settings": "설정",
 
@@ -218,6 +219,7 @@ export const translations = {
 
     // ── BottomNav ────────────────────────────────────────────────────────────
     "nav.scrapbook": "Archive",
+    "nav.add": "Add",
     "nav.search": "Search",
     "nav.settings": "Settings",
 

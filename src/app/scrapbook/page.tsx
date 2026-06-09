@@ -126,7 +126,7 @@ export default async function ScrapbookPage({
                 ))}
               </div>
             ) : (
-              <TimelineView artworks={list} />
+              <TimelineView artworks={list} locale={locale} />
             )}
           </>
         )}

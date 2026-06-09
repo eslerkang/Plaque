@@ -1,9 +1,10 @@
 import Link from "next/link";
 import Image from "next/image";
 import { MapPin, CalendarDays } from "lucide-react";
-import { formatDate, formatDateShort } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
 import { StarRating } from "@/components/StarRating";
 import type { ArtworkWithUrls } from "@/lib/types";
+import { t, DEFAULT_LOCALE, type Locale } from "@/lib/i18n";
 
 interface VisitGroup {
   key: string;
@@ -82,7 +83,13 @@ function ArtworkRow({ artwork }: { artwork: ArtworkWithUrls }) {
   );
 }
 
-export function TimelineView({ artworks }: { artworks: ArtworkWithUrls[] }) {
+export function TimelineView({
+  artworks,
+  locale = DEFAULT_LOCALE,
+}: {
+  artworks: ArtworkWithUrls[];
+  locale?: Locale;
+}) {
   const groups = groupByVisit(artworks);
 
   return (
@@ -102,7 +109,7 @@ export function TimelineView({ artworks }: { artworks: ArtworkWithUrls[] }) {
                   <span>{formatDate(group.visitDate)}</span>
                 </>
               ) : (
-                <span>날짜 미등록</span>
+                <span>{t("timeline.undated", locale)}</span>
               )}
             </div>
             {(group.gallery || group.exhibition) && (
@@ -114,7 +121,7 @@ export function TimelineView({ artworks }: { artworks: ArtworkWithUrls[] }) {
               </div>
             )}
             <p className="text-xs font-medium text-foreground">
-              작품 {group.artworks.length}점
+              {t("timeline.artworkCount", locale, { n: group.artworks.length })}
             </p>
           </div>
 

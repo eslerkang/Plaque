@@ -13,9 +13,11 @@ import {
 } from "@/components/ui/dialog";
 import { Trash2, Loader2 } from "lucide-react";
 import { BUCKET } from "@/lib/supabase/storage";
+import { useTranslation } from "@/components/LocaleProvider";
 
 export function DeleteArtworkButton({ id }: { id: string }) {
   const router = useRouter();
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,7 +42,7 @@ export function DeleteArtworkButton({ id }: { id: string }) {
       .eq("id", id);
 
     if (deleteError) {
-      setError("삭제 중 오류가 발생했습니다. 다시 시도해 주세요.");
+      setError(t("detail.deleteError"));
       setDeleting(false);
       return;
     }
@@ -70,15 +72,15 @@ export function DeleteArtworkButton({ id }: { id: string }) {
         onClick={() => { setOpen(true); setError(null); }}
       >
         <Trash2 className="h-4 w-4" />
-        삭제
+        {t("detail.delete")}
       </Button>
 
       <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setError(null); }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>작품 삭제</DialogTitle>
+            <DialogTitle>{t("detail.deleteTitle")}</DialogTitle>
             <DialogDescription>
-              이 작품 기록을 삭제할까요? 삭제 후에는 복구할 수 없어요.
+              {t("detail.deleteBody")}
             </DialogDescription>
           </DialogHeader>
 
@@ -93,7 +95,7 @@ export function DeleteArtworkButton({ id }: { id: string }) {
               onClick={() => setOpen(false)}
               disabled={deleting}
             >
-              취소
+              {t("common.cancel")}
             </Button>
             <Button
               variant="destructive"
@@ -104,7 +106,7 @@ export function DeleteArtworkButton({ id }: { id: string }) {
               {deleting ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                "삭제"
+                t("detail.deleteConfirm")
               )}
             </Button>
           </div>

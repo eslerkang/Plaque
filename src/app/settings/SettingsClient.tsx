@@ -63,13 +63,6 @@ export function SettingsClient({ profile, userEmail, artworkCount, galleryCount 
     if (next === locale || isChangingLocale) return;
     startLocaleTransition(async () => {
       await setLocale(next);
-      // Also sync to profiles.language if column exists
-      const supabase = createClient();
-      supabase
-        .from("profiles")
-        .update({ language: next })
-        .eq("id", profile?.id ?? "")
-        .then(() => {}) // best-effort, ignore result
       router.refresh();
     });
   }
