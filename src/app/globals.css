@@ -18,8 +18,11 @@
   --radius-sm: var(--radius-s);
   --radius-md: var(--radius-m);
   --radius-lg: var(--radius-l);
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  /* Body / UI — Noto Sans KR (SIL OFL 1.1) */
+  --font-sans: var(--font-sans), "Noto Sans KR", ui-sans-serif, system-ui, sans-serif;
+  /* Display / Headings — 나눔명조 / Nanum Myeongjo (SIL OFL 1.1) */
+  --font-serif: var(--font-serif), "Nanum Myeongjo", ui-serif, Georgia, serif;
+  --font-mono: ui-monospace, "SFMono-Regular", Consolas, monospace;
 }
 
 :root {
@@ -54,7 +57,7 @@ html {
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-sans), "Noto Sans KR", ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

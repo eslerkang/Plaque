@@ -22,7 +22,7 @@ export default async function LoginPage({
       <div className="w-full max-w-sm space-y-8">
         {/* Wordmark */}
         <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold tracking-tight text-foreground">
+          <h1 className="text-4xl font-bold tracking-tight text-foreground font-serif">
             Plaque
           </h1>
           <p className="text-sm text-muted-foreground">

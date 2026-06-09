@@ -18,7 +18,7 @@ export default async function LandingPage() {
         <div className="max-w-sm space-y-6">
           {/* Wordmark */}
           <div className="space-y-1">
-            <h1 className="text-5xl font-bold tracking-tight text-foreground">
+            <h1 className="text-5xl font-bold tracking-tight text-foreground font-serif">
               Plaque
             </h1>
             <p className="text-lg text-muted-foreground">나만의 미술관 스크랩북</p>

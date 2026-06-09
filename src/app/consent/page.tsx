@@ -29,7 +29,7 @@ export default async function ConsentPage() {
       <div className="w-full max-w-sm space-y-8">
         {/* Brand */}
         <div className="text-center space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight">Plaque</h1>
+          <h1 className="text-3xl font-bold tracking-tight font-serif">Plaque</h1>
           <p className="text-sm text-muted-foreground">서비스 이용 동의</p>
         </div>
 
