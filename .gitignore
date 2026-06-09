@@ -28,6 +28,11 @@
 **/.DS_Store
 *.pem
 
+# internal documents (design guides, specs — not for public repos)
+DESIGN_GUIDE.html
+DESIGN_GUIDE*.html
+*.design-guide.*
+
 # temp scaffold dir (safe to delete manually)
 /tmp-init/
 
