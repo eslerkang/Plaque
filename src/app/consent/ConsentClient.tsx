@@ -5,10 +5,12 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import { useTranslation } from "@/components/LocaleProvider";
 import { acceptTerms } from "./actions";
 
 export function ConsentClient({ hasAccepted = false }: { hasAccepted?: boolean }) {
   const router = useRouter();
+  const { t } = useTranslation();
   const [isPending, startTransition] = useTransition();
   const [agreedTerms, setAgreedTerms] = useState(false);
   const [agreedPrivacy, setAgreedPrivacy] = useState(false);
@@ -42,7 +44,7 @@ export function ConsentClient({ hasAccepted = false }: { hasAccepted?: boolean }
         router.push("/scrapbook");
         router.refresh();
       } catch {
-        setError("처리 중 오류가 발생했습니다. 다시 시도해 주세요.");
+        setError(t("consent.error"));
       }
     });
   }
@@ -52,7 +54,7 @@ export function ConsentClient({ hasAccepted = false }: { hasAccepted?: boolean }
     return (
       <div className="flex flex-col items-center gap-3 py-4 text-muted-foreground">
         <Loader2 className="h-5 w-5 animate-spin" />
-        <p className="text-sm">로딩 중...</p>
+        <p className="text-sm">{t("common.loading")}</p>
       </div>
     );
   }
@@ -71,15 +73,16 @@ export function ConsentClient({ hasAccepted = false }: { hasAccepted?: boolean }
         </div>
         <span className="text-sm leading-relaxed">
           <span className="text-destructive">*</span>{" "}
+          {t("consent.agreePrefix")}
           <Link
             href="/terms"
             target="_blank"
             className="underline underline-offset-2 hover:text-foreground transition-colors"
             onClick={(e) => e.stopPropagation()}
           >
-            이용약관
+            {t("settings.terms")}
           </Link>
-          에 동의합니다. (필수)
+          {t("consent.agreeSuffix")}
         </span>
       </label>
 
@@ -95,15 +98,16 @@ export function ConsentClient({ hasAccepted = false }: { hasAccepted?: boolean }
         </div>
         <span className="text-sm leading-relaxed">
           <span className="text-destructive">*</span>{" "}
+          {t("consent.agreePrefix")}
           <Link
             href="/privacy"
             target="_blank"
             className="underline underline-offset-2 hover:text-foreground transition-colors"
             onClick={(e) => e.stopPropagation()}
           >
-            개인정보처리방침
+            {t("settings.privacy")}
           </Link>
-          에 동의합니다. (필수)
+          {t("consent.agreeSuffix")}
         </span>
       </label>
 
@@ -120,15 +124,15 @@ export function ConsentClient({ hasAccepted = false }: { hasAccepted?: boolean }
         {isPending ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            처리 중...
+            {t("consent.submitting")}
           </>
         ) : (
-          "동의하고 시작하기"
+          t("consent.submit")
         )}
       </Button>
 
       <p className="text-xs text-muted-foreground text-center">
-        두 항목 모두 동의해야 서비스를 이용할 수 있습니다.
+        {t("consent.required")}
       </p>
     </form>
   );

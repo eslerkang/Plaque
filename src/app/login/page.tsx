@@ -2,6 +2,10 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { LoginForm } from "./LoginForm";
+import { LocaleProvider } from "@/components/LocaleProvider";
+import { LocaleToggle } from "@/components/LocaleToggle";
+import { getLocale } from "@/lib/i18n/server";
+import { t } from "@/lib/i18n";
 
 export default async function LoginPage({
   searchParams,
@@ -15,33 +19,40 @@ export default async function LoginPage({
 
   if (user) redirect("/scrapbook");
 
-  const { error } = await searchParams;
+  const [{ error }, locale] = await Promise.all([
+    searchParams,
+    getLocale(),
+  ]);
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center bg-background px-6">
-      <div className="w-full max-w-sm space-y-8">
-        {/* Wordmark */}
-        <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold tracking-tight text-foreground font-serif">
-            Plaque
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            나만의 미술관 스크랩북
+    <LocaleProvider locale={locale}>
+      <main className="min-h-screen flex flex-col items-center justify-center bg-background px-6">
+        <div className="w-full max-w-sm space-y-8">
+          {/* Wordmark */}
+          <div className="text-center space-y-2">
+            <h1 className="text-4xl font-bold tracking-tight text-foreground font-serif">
+              {t("login.title", locale)}
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              {t("login.subtitle", locale)}
+            </p>
+          </div>
+
+          <LoginForm error={error} />
+
+          <p className="text-center text-xs text-muted-foreground">
+            <Link href="/terms" className="underline underline-offset-2 hover:text-foreground transition-colors">
+              {t("settings.terms", locale)}
+            </Link>
+            {locale === "ko" ? " 및 " : " and "}
+            <Link href="/privacy" className="underline underline-offset-2 hover:text-foreground transition-colors">
+              {t("settings.privacy", locale)}
+            </Link>
           </p>
+
+          <LocaleToggle className="justify-center" />
         </div>
-
-        <LoginForm error={error} />
-
-        <p className="text-center text-xs text-muted-foreground">
-          <Link href="/terms" className="underline underline-offset-2 hover:text-foreground transition-colors">
-            이용약관
-          </Link>
-          {" "}및{" "}
-          <Link href="/privacy" className="underline underline-offset-2 hover:text-foreground transition-colors">
-            개인정보처리방침
-          </Link>
-        </p>
-      </div>
-    </main>
+      </main>
+    </LocaleProvider>
   );
 }
