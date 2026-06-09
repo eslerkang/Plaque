@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+# ─────────────────────────────────────────────────────────────────────────────
+# Plaque pre-commit hook
+# Blocks commits that contain internal documents or hardcoded secrets.
+#
+# Installed automatically via `npm install` (prepare script sets
+# core.hooksPath to .githooks/).
+#
+# Emergency bypass: git commit --no-verify  (document the reason in the commit)
+# ─────────────────────────────────────────────────────────────────────────────
+set -euo pipefail
+
+ERRORS=()
+STAGED=$(git diff --cached --name-only --diff-filter=ACM 2>/dev/null || true)
+
+# ── 1. Forbidden file patterns ───────────────────────────────────────────────
+# Internal design docs, specs, and similar files should never be committed.
+BLOCKED_PATTERNS=(
+  "DESIGN_GUIDE"
+  "DESIGN_SPEC"
+  "INTERNAL_"
+  "\.design-guide\."
+  "\.spec\.html$"
+)
+
+for pat in "${BLOCKED_PATTERNS[@]}"; do
+  while IFS= read -r f; do
+    [[ -z "$f" ]] && continue
+    if echo "$f" | grep -qiE "$pat"; then
+      ERRORS+=("Internal document staged: $f — add to .gitignore instead")
+    fi
+  done <<< "$STAGED"
+done
+
+# ── 2. .env files (belt-and-suspenders over .gitignore) ─────────────────────
+while IFS= read -r f; do
+  [[ -z "$f" ]] && continue
+  if basename "$f" | grep -qE '^\.env(\.|$)'; then
+    ERRORS+=(".env file staged: $f — must not be committed")
+  fi
+done <<< "$STAGED"
+
+# ── 3. Scan staged diff for hardcoded secrets ────────────────────────────────
+DIFF=$(git diff --cached -U0 2>/dev/null | grep '^+' | grep -v '^+++' || true)
+
+# Real Supabase project URL (ref is 20 lowercase alphanumeric chars, no < > brackets)
+# Placeholders like https://<project-ref>.supabase.co are allowed.
+if echo "$DIFF" | grep -qE 'https://[a-z0-9]{15,25}\.supabase\.co'; then
+  HITS=$(echo "$DIFF" | grep -E 'https://[a-z0-9]{15,25}\.supabase\.co' | grep -v '<' || true)
+  if [[ -n "$HITS" ]]; then
+    ERRORS+=("Hardcoded Supabase project URL in staged diff — use a placeholder in docs (e.g. https://<project-ref>.supabase.co)")
+  fi
+fi
+
+# Real Supabase JWT (anon/service key).
+# Structure: <header>.<payload>.<signature>
+# HMAC-SHA256 signatures are exactly 43 base64url chars.
+# Test/fake JWTs use a readable string as the signature (< 43 chars or contains words).
+if echo "$DIFF" | grep -qE 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.[A-Za-z0-9_-]{100,}\.[A-Za-z0-9_-]{43}[^A-Za-z0-9_-]'; then
+  ERRORS+=("Possible real Supabase JWT (anon/service key) in staged diff — store in .env.local only")
+fi
+
+# ── Report ────────────────────────────────────────────────────────────────────
+if [[ ${#ERRORS[@]} -gt 0 ]]; then
+  printf '\n🔴  pre-commit: commit blocked\n\n'
+  for e in "${ERRORS[@]}"; do
+    printf '   ✗  %s\n' "$e"
+  done
+  printf '\nFix the issues above, then try again.\n'
+  printf 'Emergency bypass: git commit --no-verify  (document the reason)\n\n'
+  exit 1
+fi
+
+exit 0
