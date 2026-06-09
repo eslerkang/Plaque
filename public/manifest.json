@@ -4,14 +4,21 @@
   "description": "방문한 작품을 기록하고, 나만의 미술관을 만들어보세요.",
   "start_url": "/scrapbook",
   "display": "standalone",
-  "background_color": "#faf9f7",
+  "background_color": "#1a1917",
   "theme_color": "#faf9f7",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "/favicon.ico",
-      "sizes": "48x48",
-      "type": "image/x-icon"
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }

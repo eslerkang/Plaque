@@ -39,9 +39,29 @@ export const metadata: Metadata = {
   title: "Plaque — 나만의 미술관 스크랩북",
   description: "방문한 작품을 기록하고, 감상을 남기고, 나만의 미술관을 만들어보세요.",
   manifest: "/manifest.json",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "48x48", type: "image/x-icon" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
+  },
+  openGraph: {
+    title: "Plaque — 나만의 미술관 스크랩북",
+    description: "방문한 작품을 기록하고, 감상을 남기고, 나만의 미술관을 만들어보세요.",
+    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Plaque — 나만의 미술관 스크랩북",
+    description: "방문한 작품을 기록하고, 감상을 남기고, 나만의 미술관을 만들어보세요.",
+    images: ["/og-image.png"],
+  },
   appleWebApp: {
     capable: true,
-    statusBarStyle: "default",
+    statusBarStyle: "black-translucent",
     title: "Plaque",
   },
   formatDetection: {
