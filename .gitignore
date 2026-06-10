@@ -32,9 +32,11 @@ next-env.d.ts
 
 # ── Internal — never commit ───────────────────────────────────────────────────
 
-# AI coding assistant instructions
+# AI coding assistant instructions, skills, and internal docs
 AGENTS.md
 CLAUDE.md
+/.claude/
+/docs/
 
 # Internal design/spec documents
 DESIGN_GUIDE*.html
@@ -50,6 +52,8 @@ DESIGN_TEAM_PROMPT*.md
 /src/__tests__/
 jest.config.ts
 jest.setup.ts
+jest.sandbox.config.js
+jest.sandbox.stylemock.js
 playwright.config.ts
 
 # Build/test artifact output

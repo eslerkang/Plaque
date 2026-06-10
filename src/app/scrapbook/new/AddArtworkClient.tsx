@@ -5,13 +5,15 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { StarRating } from "@/components/StarRating";
-import { TagInput } from "@/components/TagInput";
+import { ArtworkMetadataFields } from "@/components/ArtworkMetadataFields";
 import { ImageProcessor } from "@/components/ImageProcessor";
 import type { ProcessedImages, ImageProcessorHandle } from "@/components/ImageProcessor";
+import {
+  EMPTY_ARTWORK_METADATA,
+  isMetadataValid,
+  metadataToRow,
+  type ArtworkMetadata,
+} from "@/lib/artwork-metadata";
 import {
   ArrowLeft,
   Camera,
@@ -19,37 +21,10 @@ import {
   Loader2,
   ChevronRight,
   ChevronLeft,
-  X,
 } from "lucide-react";
 import { useTranslation } from "@/components/LocaleProvider";
 
 type Step = "upload" | "review" | "metadata";
-
-interface FormData {
-  title: string;
-  artist_name: string;
-  year: string;
-  medium: string;
-  gallery_name: string;
-  exhibition_title: string;
-  visit_date: string;
-  personal_note: string;
-  rating: number | null;
-  tags: string[];
-}
-
-const INITIAL_FORM: FormData = {
-  title: "",
-  artist_name: "",
-  year: "",
-  medium: "",
-  gallery_name: "",
-  exhibition_title: "",
-  visit_date: "",
-  personal_note: "",
-  rating: null,
-  tags: [],
-};
 
 export function AddArtworkClient({
   userId,
@@ -68,7 +43,7 @@ export function AddArtworkClient({
   const [processing, setProcessing] = useState(false);
   const [processed, setProcessed] = useState<ProcessedImages | null>(null);
   const [selectedType, setSelectedType] = useState<"original" | "cleaned">("original");
-  const [form, setForm] = useState<FormData>(INITIAL_FORM);
+  const [form, setForm] = useState<ArtworkMetadata>(EMPTY_ARTWORK_METADATA);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -146,7 +121,7 @@ export function AddArtworkClient({
   // ── Submit ───────────────────────────────────────────────────────────────────
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.title.trim()) { setError(t("field.title.error")); return; }
+    if (!isMetadataValid(form)) { setError(t("field.title.error")); return; }
     if (!processed) return;
 
     setSubmitting(true);
@@ -160,8 +135,6 @@ export function AddArtworkClient({
         cleanedPath = await uploadImage(processed.cleanedDataUrl, "cleaned");
       }
 
-      const tags = form.tags;
-
       const { data, error: insertError } = await supabase
         .from("artwork_entries")
         .insert({
@@ -169,16 +142,7 @@ export function AddArtworkClient({
           original_image_path: originalPath,
           cleaned_image_path: cleanedPath,
           selected_image_type: selectedType,
-          title: form.title.trim(),
-          artist_name: form.artist_name.trim() || null,
-          year: form.year.trim() || null,
-          medium: form.medium.trim() || null,
-          gallery_name: form.gallery_name.trim() || null,
-          exhibition_title: form.exhibition_title.trim() || null,
-          visit_date: form.visit_date || null,
-          personal_note: form.personal_note.trim() || null,
-          rating: form.rating,
-          tags: tags.length > 0 ? tags : null,
+          ...metadataToRow(form),
         })
         .select("id")
         .single();
@@ -195,10 +159,6 @@ export function AddArtworkClient({
       setError(t("add.metadata.error"));
       setSubmitting(false);
     }
-  }
-
-  function updateForm(key: keyof FormData, value: string | number | null | string[]) {
-    setForm((f) => ({ ...f, [key]: value }));
   }
 
   const stepLabels: Record<Step, string> = {
@@ -467,122 +427,13 @@ export function AddArtworkClient({
               </div>
             )}
 
-            <div className="space-y-2">
-              <Label htmlFor="title">
-                {t("field.title")} <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                id="title"
-                placeholder={t("field.title.placeholder")}
-                value={form.title}
-                onChange={(e) => updateForm("title", e.target.value)}
-                required
-                autoFocus
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="artist">{t("field.artist")}</Label>
-              <Input
-                id="artist"
-                placeholder={t("field.artist.placeholder")}
-                value={form.artist_name}
-                onChange={(e) => updateForm("artist_name", e.target.value)}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label htmlFor="year">{t("field.year")}</Label>
-                <Input
-                  id="year"
-                  placeholder={t("field.year.placeholder")}
-                  value={form.year}
-                  onChange={(e) => updateForm("year", e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="medium">{t("field.medium")}</Label>
-                <Input
-                  id="medium"
-                  placeholder={t("field.medium.placeholder")}
-                  value={form.medium}
-                  onChange={(e) => updateForm("medium", e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="gallery">{t("field.gallery")}</Label>
-              <Input
-                id="gallery"
-                placeholder={t("field.gallery.placeholder")}
-                value={form.gallery_name}
-                onChange={(e) => updateForm("gallery_name", e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="exhibition">{t("field.exhibition")}</Label>
-              <Input
-                id="exhibition"
-                placeholder={t("field.exhibition.placeholder")}
-                value={form.exhibition_title}
-                onChange={(e) => updateForm("exhibition_title", e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="visit_date">{t("field.visitDate")}</Label>
-              <Input
-                id="visit_date"
-                type="date"
-                value={form.visit_date}
-                onChange={(e) => updateForm("visit_date", e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>{t("field.rating")}</Label>
-              <div className="flex items-center gap-3">
-                <StarRating
-                  value={form.rating}
-                  onChange={(v) => updateForm("rating", v)}
-                  size="lg"
-                />
-                {form.rating && (
-                  <button
-                    type="button"
-                    onClick={() => updateForm("rating", null)}
-                    className="text-muted-foreground hover:text-foreground"
-                    aria-label="clear rating"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="note">{t("field.note")}</Label>
-              <Textarea
-                id="note"
-                placeholder={t("field.note.placeholder")}
-                rows={4}
-                value={form.personal_note}
-                onChange={(e) => updateForm("personal_note", e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>{t("field.tags")}</Label>
-              <TagInput
-                value={form.tags}
-                onChange={(tags) => updateForm("tags", tags)}
-                suggestions={existingTags}
-                placeholder={t("field.tags.placeholder")}
-              />
-            </div>
+            <ArtworkMetadataFields
+              value={form}
+              onChange={setForm}
+              existingTags={existingTags}
+              showPlaceholders
+              autoFocusTitle
+            />
 
             {error && <p className="text-sm text-destructive text-center">{error}</p>}
 
@@ -601,7 +452,7 @@ export function AddArtworkClient({
                 type="submit"
                 size="lg"
                 className="flex-1"
-                disabled={submitting || !form.title.trim()}
+                disabled={submitting || !isMetadataValid(form)}
               >
                 {submitting ? (
                   <>

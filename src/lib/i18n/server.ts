@@ -1,42 +1,36 @@
 import { cookies, headers } from "next/headers";
 import { type Locale, LOCALE_COOKIE } from "./index";
-import { createClient } from "@/lib/supabase/server";
+import { getAuthContext } from "@/lib/auth";
 
+function isLocale(v: unknown): v is Locale {
+  return v === "ko" || v === "en";
+}
+
+/**
+ * Resolve the request locale.
+ *
+ * 1. `plaque_locale` cookie — set by the locale toggle (server action) and
+ *    synced from the profile at login (`auth/callback`).
+ * 2. Logged-in user's saved profile preference. Served from the per-request
+ *    `getAuthContext()` cache, so this adds no extra DB round trip on
+ *    authenticated pages that already called `requireUserWithConsent()`.
+ *    (Note: cookies cannot be written during Server Component render, so the
+ *    cookie back-fill happens in the locale server action / auth callback,
+ *    never here.)
+ * 3. `Accept-Language` header fallback.
+ */
 export async function getLocale(): Promise<Locale> {
-  // 1. Cookie fast path — set on prior visit or after login sync
   const cookieStore = await cookies();
   const saved = cookieStore.get(LOCALE_COOKIE)?.value;
-  if (saved === "ko" || saved === "en") return saved;
+  if (isLocale(saved)) return saved;
 
-  // 2. If no cookie, check whether the logged-in user has a saved preference
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (user) {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("locale")
-        .eq("id", user.id)
-        .single();
-      const dbLocale = profile?.locale;
-      if (dbLocale === "ko" || dbLocale === "en") {
-        // Back-fill the cookie so subsequent requests skip the DB lookup
-        cookieStore.set(LOCALE_COOKIE, dbLocale, {
-          maxAge: 60 * 60 * 24 * 365,
-          path: "/",
-          httpOnly: false,
-          sameSite: "lax",
-        });
-        return dbLocale;
-      }
-    }
+    const { profile } = await getAuthContext();
+    if (isLocale(profile?.locale)) return profile.locale;
   } catch {
     // Non-fatal — fall through to Accept-Language detection
   }
 
-  // 3. Fall back to browser/OS language
   const headersList = await headers();
   const acceptLang = headersList.get("accept-language") ?? "";
   return acceptLang.toLowerCase().includes("ko") ? "ko" : "en";

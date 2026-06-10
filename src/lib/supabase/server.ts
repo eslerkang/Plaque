@@ -1,7 +1,17 @@
+import { cache } from "react";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
-export async function createClient() {
+/**
+ * Per-request memoized Supabase server client.
+ *
+ * `React.cache` deduplicates within a single server request, so layouts,
+ * pages, and helpers (`requireUserWithConsent`, `getLocale`, …) all share
+ * one client instead of re-creating it per call site. In non-RSC contexts
+ * (Route Handlers, Server Actions) `cache` degrades to a pass-through,
+ * which preserves the previous behavior.
+ */
+export const createClient = cache(async () => {
   const cookieStore = await cookies();
 
   return createServerClient(
@@ -24,4 +34,4 @@ export async function createClient() {
       },
     }
   );
-}
+});

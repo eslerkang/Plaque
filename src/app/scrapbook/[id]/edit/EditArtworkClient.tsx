@@ -6,13 +6,15 @@ import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { StarRating } from "@/components/StarRating";
-import { TagInput } from "@/components/TagInput";
+import { ArtworkMetadataFields } from "@/components/ArtworkMetadataFields";
+import {
+  isMetadataValid,
+  metadataFromArtwork,
+  metadataToRow,
+  type ArtworkMetadata,
+} from "@/lib/artwork-metadata";
 import type { ArtworkWithUrls } from "@/lib/types";
-import { ArrowLeft, Loader2, X } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { useTranslation } from "@/components/LocaleProvider";
 
 interface EditArtworkClientProps {
@@ -26,16 +28,9 @@ export function EditArtworkClient({ artwork, existingTags = [] }: EditArtworkCli
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [title, setTitle] = useState(artwork.title);
-  const [artist, setArtist] = useState(artwork.artist_name ?? "");
-  const [year, setYear] = useState(artwork.year ?? "");
-  const [medium, setMedium] = useState(artwork.medium ?? "");
-  const [gallery, setGallery] = useState(artwork.gallery_name ?? "");
-  const [exhibition, setExhibition] = useState(artwork.exhibition_title ?? "");
-  const [visitDate, setVisitDate] = useState(artwork.visit_date ?? "");
-  const [note, setNote] = useState(artwork.personal_note ?? "");
-  const [rating, setRating] = useState<number | null>(artwork.rating ?? null);
-  const [tags, setTags] = useState<string[]>(artwork.tags ?? []);
+  const [form, setForm] = useState<ArtworkMetadata>(() =>
+    metadataFromArtwork(artwork)
+  );
   const [selectedType, setSelectedType] = useState<"original" | "cleaned">(
     artwork.selected_image_type ?? "original"
   );
@@ -47,7 +42,7 @@ export function EditArtworkClient({ artwork, existingTags = [] }: EditArtworkCli
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!title.trim()) {
+    if (!isMetadataValid(form)) {
       setError(t("field.title.error"));
       return;
     }
@@ -56,21 +51,11 @@ export function EditArtworkClient({ artwork, existingTags = [] }: EditArtworkCli
     setError(null);
 
     const supabase = createClient();
-    const tagList = tags;
 
     const { error: updateError } = await supabase
       .from("artwork_entries")
       .update({
-        title: title.trim(),
-        artist_name: artist.trim() || null,
-        year: year.trim() || null,
-        medium: medium.trim() || null,
-        gallery_name: gallery.trim() || null,
-        exhibition_title: exhibition.trim() || null,
-        visit_date: visitDate || null,
-        personal_note: note.trim() || null,
-        rating,
-        tags: tagList.length > 0 ? tagList : null,
+        ...metadataToRow(form),
         selected_image_type: selectedType,
       })
       .eq("id", artwork.id);
@@ -146,109 +131,11 @@ export function EditArtworkClient({ artwork, existingTags = [] }: EditArtworkCli
             )}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="title">
-              {t("field.title")} <span className="text-destructive">*</span>
-            </Label>
-            <Input
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="artist">{t("field.artist")}</Label>
-            <Input
-              id="artist"
-              value={artist}
-              onChange={(e) => setArtist(e.target.value)}
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label htmlFor="year">{t("field.year")}</Label>
-              <Input
-                id="year"
-                value={year}
-                onChange={(e) => setYear(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="medium">{t("field.medium")}</Label>
-              <Input
-                id="medium"
-                value={medium}
-                onChange={(e) => setMedium(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="gallery">{t("field.gallery")}</Label>
-            <Input
-              id="gallery"
-              value={gallery}
-              onChange={(e) => setGallery(e.target.value)}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="exhibition">{t("field.exhibition")}</Label>
-            <Input
-              id="exhibition"
-              value={exhibition}
-              onChange={(e) => setExhibition(e.target.value)}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="visit_date">{t("field.visitDate")}</Label>
-            <Input
-              id="visit_date"
-              type="date"
-              value={visitDate}
-              onChange={(e) => setVisitDate(e.target.value)}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>{t("field.rating")}</Label>
-            <div className="flex items-center gap-3">
-              <StarRating value={rating} onChange={setRating} size="lg" />
-              {rating && (
-                <button
-                  type="button"
-                  onClick={() => setRating(null)}
-                  className="text-muted-foreground hover:text-foreground"
-                  aria-label="clear rating"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="note">{t("field.note")}</Label>
-            <Textarea
-              id="note"
-              rows={4}
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>{t("field.tags")}</Label>
-            <TagInput
-              value={tags}
-              onChange={setTags}
-              suggestions={existingTags}
-            />
-          </div>
+          <ArtworkMetadataFields
+            value={form}
+            onChange={setForm}
+            existingTags={existingTags}
+          />
 
           {error && (
             <p className="text-sm text-destructive text-center">{error}</p>
