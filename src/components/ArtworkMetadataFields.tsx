@@ -11,7 +11,14 @@ import type { ArtworkMetadata } from "@/lib/artwork-metadata";
 
 interface ArtworkMetadataFieldsProps {
   value: ArtworkMetadata;
-  onChange: (next: ArtworkMetadata) => void;
+  /**
+   * State setter for the metadata object. Must accept a functional updater
+   * (i.e. pass `setForm` from `useState` directly). The component ALWAYS
+   * updates functionally — spreading the `value` prop here would capture a
+   * stale snapshot and drop changes when multiple fields fire before the
+   * next render (caught by E2E spec 11 / the rapid-succession unit test).
+   */
+  onChange: React.Dispatch<React.SetStateAction<ArtworkMetadata>>;
   /** Tag suggestions (the user's previously used tags). */
   existingTags?: string[];
   /** Show example placeholders (add flow). Edit flow keeps fields bare. */
@@ -40,7 +47,15 @@ export function ArtworkMetadataFields({
     key: K,
     fieldValue: ArtworkMetadata[K]
   ) {
-    onChange({ ...value, [key]: fieldValue });
+    // Functional update — never spread the render-time `value` prop.
+    onChange((prev) => ({ ...prev, [key]: fieldValue }));
+  }
+
+  function updateText<K extends keyof ArtworkMetadata>(
+    key: K,
+    e: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) {
+    update(key, e.currentTarget.value as ArtworkMetadata[K]);
   }
 
   return (
@@ -51,9 +66,10 @@ export function ArtworkMetadataFields({
         </Label>
         <Input
           id="title"
+          name="title"
           placeholder={showPlaceholders ? t("field.title.placeholder") : undefined}
           value={value.title}
-          onChange={(e) => update("title", e.target.value)}
+          onInput={(e) => updateText("title", e)}
           required
           autoFocus={autoFocusTitle}
         />
@@ -63,9 +79,10 @@ export function ArtworkMetadataFields({
         <Label htmlFor="artist">{t("field.artist")}</Label>
         <Input
           id="artist"
+          name="artist_name"
           placeholder={showPlaceholders ? t("field.artist.placeholder") : undefined}
           value={value.artist_name}
-          onChange={(e) => update("artist_name", e.target.value)}
+          onInput={(e) => updateText("artist_name", e)}
         />
       </div>
 
@@ -74,18 +91,20 @@ export function ArtworkMetadataFields({
           <Label htmlFor="year">{t("field.year")}</Label>
           <Input
             id="year"
+            name="year"
             placeholder={showPlaceholders ? t("field.year.placeholder") : undefined}
             value={value.year}
-            onChange={(e) => update("year", e.target.value)}
+            onInput={(e) => updateText("year", e)}
           />
         </div>
         <div className="space-y-2">
           <Label htmlFor="medium">{t("field.medium")}</Label>
           <Input
             id="medium"
+            name="medium"
             placeholder={showPlaceholders ? t("field.medium.placeholder") : undefined}
             value={value.medium}
-            onChange={(e) => update("medium", e.target.value)}
+            onInput={(e) => updateText("medium", e)}
           />
         </div>
       </div>
@@ -94,9 +113,10 @@ export function ArtworkMetadataFields({
         <Label htmlFor="gallery">{t("field.gallery")}</Label>
         <Input
           id="gallery"
+          name="gallery_name"
           placeholder={showPlaceholders ? t("field.gallery.placeholder") : undefined}
           value={value.gallery_name}
-          onChange={(e) => update("gallery_name", e.target.value)}
+          onInput={(e) => updateText("gallery_name", e)}
         />
       </div>
 
@@ -104,9 +124,10 @@ export function ArtworkMetadataFields({
         <Label htmlFor="exhibition">{t("field.exhibition")}</Label>
         <Input
           id="exhibition"
+          name="exhibition_title"
           placeholder={showPlaceholders ? t("field.exhibition.placeholder") : undefined}
           value={value.exhibition_title}
-          onChange={(e) => update("exhibition_title", e.target.value)}
+          onInput={(e) => updateText("exhibition_title", e)}
         />
       </div>
 
@@ -114,9 +135,10 @@ export function ArtworkMetadataFields({
         <Label htmlFor="visit_date">{t("field.visitDate")}</Label>
         <Input
           id="visit_date"
+          name="visit_date"
           type="date"
           value={value.visit_date}
-          onChange={(e) => update("visit_date", e.target.value)}
+          onInput={(e) => updateText("visit_date", e)}
         />
       </div>
 
@@ -145,10 +167,11 @@ export function ArtworkMetadataFields({
         <Label htmlFor="note">{t("field.note")}</Label>
         <Textarea
           id="note"
+          name="personal_note"
           placeholder={showPlaceholders ? t("field.note.placeholder") : undefined}
           rows={4}
           value={value.personal_note}
-          onChange={(e) => update("personal_note", e.target.value)}
+          onInput={(e) => updateText("personal_note", e)}
         />
       </div>
 
