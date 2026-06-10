@@ -10,12 +10,14 @@ import { ArtworkMetadataFields } from "@/components/ArtworkMetadataFields";
 import {
   isMetadataValid,
   metadataFromArtwork,
+  metadataFromFormData,
   metadataToRow,
   type ArtworkMetadata,
 } from "@/lib/artwork-metadata";
 import type { ArtworkWithUrls } from "@/lib/types";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { useTranslation } from "@/components/LocaleProvider";
+import { useHydrated } from "@/lib/use-hydrated";
 
 interface EditArtworkClientProps {
   artwork: ArtworkWithUrls;
@@ -25,6 +27,7 @@ interface EditArtworkClientProps {
 export function EditArtworkClient({ artwork, existingTags = [] }: EditArtworkClientProps) {
   const router = useRouter();
   const { t } = useTranslation();
+  const hydrated = useHydrated();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,7 +45,11 @@ export function EditArtworkClient({ artwork, existingTags = [] }: EditArtworkCli
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!isMetadataValid(form)) {
+    const submittedForm = metadataFromFormData(
+      form,
+      new FormData(e.currentTarget as HTMLFormElement)
+    );
+    if (!isMetadataValid(submittedForm)) {
       setError(t("field.title.error"));
       return;
     }
@@ -55,7 +62,7 @@ export function EditArtworkClient({ artwork, existingTags = [] }: EditArtworkCli
     const { error: updateError } = await supabase
       .from("artwork_entries")
       .update({
-        ...metadataToRow(form),
+        ...metadataToRow(submittedForm),
         selected_image_type: selectedType,
       })
       .eq("id", artwork.id);
@@ -148,7 +155,7 @@ export function EditArtworkClient({ artwork, existingTags = [] }: EditArtworkCli
             <Button
               type="submit"
               className="flex-1"
-              disabled={submitting}
+              disabled={!hydrated || submitting}
             >
               {submitting ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

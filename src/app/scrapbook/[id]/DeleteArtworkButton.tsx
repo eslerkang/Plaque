@@ -14,10 +14,12 @@ import {
 import { Trash2, Loader2 } from "lucide-react";
 import { BUCKET } from "@/lib/supabase/storage";
 import { useTranslation } from "@/components/LocaleProvider";
+import { useHydrated } from "@/lib/use-hydrated";
 
 export function DeleteArtworkButton({ id }: { id: string }) {
   const router = useRouter();
   const { t } = useTranslation();
+  const hydrated = useHydrated();
   const [open, setOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -70,6 +72,7 @@ export function DeleteArtworkButton({ id }: { id: string }) {
         variant="outline"
         className="gap-2 text-destructive border-destructive/30 hover:bg-destructive/10"
         onClick={() => { setOpen(true); setError(null); }}
+        disabled={!hydrated}
       >
         <Trash2 className="h-4 w-4" />
         {t("detail.delete")}

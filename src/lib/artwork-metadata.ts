@@ -36,6 +36,11 @@ export const EMPTY_ARTWORK_METADATA: ArtworkMetadata = {
   tags: [],
 };
 
+function formText(formData: FormData, key: string): string {
+  const value = formData.get(key);
+  return typeof value === "string" ? value : "";
+}
+
 /** Build the editable form state from an existing row. */
 export function metadataFromArtwork(a: ArtworkEntry): ArtworkMetadata {
   return {
@@ -49,6 +54,30 @@ export function metadataFromArtwork(a: ArtworkEntry): ArtworkMetadata {
     personal_note: a.personal_note ?? "",
     rating: a.rating ?? null,
     tags: a.tags ?? [],
+  };
+}
+
+/**
+ * Merge the latest submitted DOM field values into the controlled metadata.
+ *
+ * This protects save actions from the small event-ordering window where a
+ * user or browser automation changes a field and immediately submits before
+ * React has rendered the newest controlled state.
+ */
+export function metadataFromFormData(
+  current: ArtworkMetadata,
+  formData: FormData
+): ArtworkMetadata {
+  return {
+    ...current,
+    title: formText(formData, "title"),
+    artist_name: formText(formData, "artist_name"),
+    year: formText(formData, "year"),
+    medium: formText(formData, "medium"),
+    gallery_name: formText(formData, "gallery_name"),
+    exhibition_title: formText(formData, "exhibition_title"),
+    visit_date: formText(formData, "visit_date"),
+    personal_note: formText(formData, "personal_note"),
   };
 }
 

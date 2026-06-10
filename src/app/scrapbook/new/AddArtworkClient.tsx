@@ -11,6 +11,7 @@ import type { ProcessedImages, ImageProcessorHandle } from "@/components/ImagePr
 import {
   EMPTY_ARTWORK_METADATA,
   isMetadataValid,
+  metadataFromFormData,
   metadataToRow,
   type ArtworkMetadata,
 } from "@/lib/artwork-metadata";
@@ -23,6 +24,7 @@ import {
   ChevronLeft,
 } from "lucide-react";
 import { useTranslation } from "@/components/LocaleProvider";
+import { useHydrated } from "@/lib/use-hydrated";
 
 type Step = "upload" | "review" | "metadata";
 
@@ -38,6 +40,7 @@ export function AddArtworkClient({
   const processorRef = useRef<ImageProcessorHandle>(null);
   const { t } = useTranslation();
 
+  const hydrated = useHydrated();
   const [step, setStep] = useState<Step>("upload");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [processing, setProcessing] = useState(false);
@@ -121,7 +124,11 @@ export function AddArtworkClient({
   // ── Submit ───────────────────────────────────────────────────────────────────
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!isMetadataValid(form)) { setError(t("field.title.error")); return; }
+    const submittedForm = metadataFromFormData(
+      form,
+      new FormData(e.currentTarget as HTMLFormElement)
+    );
+    if (!isMetadataValid(submittedForm)) { setError(t("field.title.error")); return; }
     if (!processed) return;
 
     setSubmitting(true);
@@ -142,7 +149,7 @@ export function AddArtworkClient({
           original_image_path: originalPath,
           cleaned_image_path: cleanedPath,
           selected_image_type: selectedType,
-          ...metadataToRow(form),
+          ...metadataToRow(submittedForm),
         })
         .select("id")
         .single();
@@ -452,7 +459,7 @@ export function AddArtworkClient({
                 type="submit"
                 size="lg"
                 className="flex-1"
-                disabled={submitting || !isMetadataValid(form)}
+                disabled={!hydrated || submitting || !isMetadataValid(form)}
               >
                 {submitting ? (
                   <>
