@@ -2,6 +2,7 @@
 
 import { Star } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/components/LocaleProvider";
 
 interface StarRatingProps {
   value: number | null;
@@ -22,6 +23,7 @@ export function StarRating({
   readonly = false,
   size = "md",
 }: StarRatingProps) {
+  const { t } = useTranslation();
   const iconSize = sizeMap[size];
 
   return (
@@ -39,7 +41,7 @@ export function StarRating({
               !readonly && "hover:scale-110 cursor-pointer",
               readonly && "cursor-default"
             )}
-            aria-label={`${star}점`}
+            aria-label={t("common.points", { n: star })}
           >
             <Star
               className={cn(

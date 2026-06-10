@@ -119,6 +119,7 @@ export default async function ScrapbookPage({
                     key={artwork.id}
                     artwork={artwork}
                     priority={index < 2}
+                    locale={locale}
                   />
                 ))}
               </div>

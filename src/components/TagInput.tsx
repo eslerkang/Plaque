@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/components/LocaleProvider";
 
 interface TagInputProps {
   value: string[];
@@ -16,9 +17,10 @@ export function TagInput({
   value,
   onChange,
   suggestions = [],
-  placeholder = "태그 입력 후 Enter",
+  placeholder,
   className,
 }: TagInputProps) {
+  const { t } = useTranslation();
   const [inputValue, setInputValue] = useState("");
   const [open, setOpen] = useState(false);
   const [highlighted, setHighlighted] = useState(-1);
@@ -118,7 +120,7 @@ export function TagInput({
               type="button"
               onClick={(e) => { e.stopPropagation(); removeTag(tag); }}
               className="text-muted-foreground hover:text-foreground transition-colors"
-              aria-label={`${tag} 제거`}
+              aria-label={t("field.tags.remove", { tag })}
             >
               <X className="h-3 w-3" />
             </button>
@@ -133,7 +135,7 @@ export function TagInput({
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           onFocus={() => inputValue.trim() && setOpen(true)}
-          placeholder={value.length === 0 ? placeholder : ""}
+          placeholder={value.length === 0 ? (placeholder ?? t("field.tags.inputPlaceholder")) : ""}
           className="flex-1 min-w-20 bg-transparent outline-none placeholder:text-muted-foreground text-sm"
           autoComplete="off"
           autoCorrect="off"
@@ -164,7 +166,7 @@ export function TagInput({
       )}
 
       <p className="mt-1 text-xs text-muted-foreground">
-        Enter 또는 쉼표(,)로 추가 · 최근 태그를 자동으로 제안해요
+        {t("field.tags.help")}
       </p>
     </div>
   );

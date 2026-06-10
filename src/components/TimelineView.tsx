@@ -116,7 +116,7 @@ export function TimelineView({
               {group.visitDate ? (
                 <>
                   <CalendarDays className="h-3 w-3 flex-shrink-0" />
-                  <span>{formatDate(group.visitDate)}</span>
+                  <span>{formatDate(group.visitDate, locale)}</span>
                 </>
               ) : (
                 <span>{t("timeline.undated", locale)}</span>

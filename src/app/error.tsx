@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/components/LocaleProvider";
 
 export default function GlobalError({
   error,
@@ -10,6 +11,8 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const { t } = useTranslation();
+
   useEffect(() => {
     // Log to error monitoring (console in dev, could be Sentry etc. in prod)
     console.error("[GlobalError]", error);
@@ -20,15 +23,15 @@ export default function GlobalError({
       <div className="space-y-6 max-w-sm">
         <div className="space-y-2">
           <p className="text-4xl">⚠️</p>
-          <h1 className="text-xl font-bold">문제가 발생했어요</h1>
+          <h1 className="text-xl font-bold">{t("error.general.heading")}</h1>
           <p className="text-sm text-muted-foreground">
-            일시적인 오류입니다. 잠시 후 다시 시도해 주세요.
+            {t("error.general.body")}
           </p>
         </div>
         <div className="flex gap-3 justify-center">
-          <Button onClick={reset}>다시 시도</Button>
+          <Button onClick={reset}>{t("error.retry")}</Button>
           <Button variant="outline" onClick={() => (window.location.href = "/scrapbook")}>
-            홈으로
+            {t("error.home")}
           </Button>
         </div>
       </div>

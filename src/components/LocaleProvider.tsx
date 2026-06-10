@@ -11,7 +11,7 @@ interface LocaleContextValue {
 
 const LocaleContext = createContext<LocaleContextValue>({
   locale: DEFAULT_LOCALE,
-  t: (key) => key,
+  t: (key, vars) => tFn(key, DEFAULT_LOCALE, vars),
 });
 
 // ── Provider ──────────────────────────────────────────────────────────────────

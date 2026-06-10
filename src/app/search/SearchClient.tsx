@@ -22,7 +22,7 @@ interface Filters {
 export function SearchClient({ artworks }: SearchClientProps) {
   const searchParams = useSearchParams();
   const initialTag = searchParams.get("tag") ?? "";
-  const { t } = useTranslation();
+  const { locale, t } = useTranslation();
 
   const [filters, setFilters] = useState<Filters>({
     query: "",
@@ -200,6 +200,7 @@ export function SearchClient({ artworks }: SearchClientProps) {
                 key={artwork.id}
                 artwork={artwork}
                 priority={index < 2}
+                locale={locale}
               />
             ))}
           </div>

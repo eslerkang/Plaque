@@ -1,24 +1,35 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import type { Locale } from "@/lib/i18n";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatDate(date: string | Date | null | undefined): string {
+function dateLocale(locale: Locale = "ko") {
+  return locale === "ko" ? "ko-KR" : "en-US";
+}
+
+export function formatDate(
+  date: string | Date | null | undefined,
+  locale: Locale = "ko"
+): string {
   if (!date) return "";
   const d = parseDateOnlyAsLocal(date);
-  return d.toLocaleDateString("ko-KR", {
+  return d.toLocaleDateString(dateLocale(locale), {
     year: "numeric",
     month: "long",
     day: "numeric",
   });
 }
 
-export function formatDateShort(date: string | Date | null | undefined): string {
+export function formatDateShort(
+  date: string | Date | null | undefined,
+  locale: Locale = "ko"
+): string {
   if (!date) return "";
   const d = parseDateOnlyAsLocal(date);
-  return d.toLocaleDateString("ko-KR", {
+  return d.toLocaleDateString(dateLocale(locale), {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",

@@ -78,6 +78,7 @@ export const translations = {
     "detail.deleteBody": "이 작품 기록을 삭제할까요? 삭제 후에는 복구할 수 없어요.",
     "detail.deleteConfirm": "삭제",
     "detail.deleteError": "삭제 중 오류가 발생했습니다. 다시 시도해 주세요.",
+    "detail.originalImageAlt": "원본 이미지",
 
     // ── Add artwork ──────────────────────────────────────────────────────────
     "add.step.upload": "사진 선택",
@@ -133,6 +134,9 @@ export const translations = {
     "field.note.placeholder": "이 작품에 대한 생각이나 느낌을 자유롭게 적어보세요...",
     "field.tags": "태그",
     "field.tags.placeholder": "예: 인상주의, 풍경화",
+    "field.tags.inputPlaceholder": "태그 입력 후 Enter",
+    "field.tags.remove": "{tag} 제거",
+    "field.tags.help": "Enter 또는 쉼표(,)로 추가 · 최근 태그를 자동으로 제안해요",
 
     // ── Search ───────────────────────────────────────────────────────────────
     "search.placeholder": "작품, 작가, 갤러리 검색...",
@@ -174,10 +178,16 @@ export const translations = {
     // ── Export ───────────────────────────────────────────────────────────────
     "export.back": "스크랩북",
     "export.print": "PDF로 저장",
+    "export.generating": "생성 중...",
     "export.subtitle": "Personal Archive",
     "export.headline": "나만의 미술관 컬렉션",
     "export.total": "총 {n}점의 작품",
     "export.footer": "Plaque — 나만의 미술관",
+    "export.field.year": "제작 연도",
+    "export.field.medium": "재료/기법",
+    "export.field.location": "장소",
+    "export.field.exhibition": "전시",
+    "export.field.visitDate": "방문일",
 
     // ── Onboarding ───────────────────────────────────────────────────────────
     "onboarding.title": "Plaque에 오신 걸 환영해요",
@@ -197,6 +207,8 @@ export const translations = {
     "ai.context": "작품의 앞뒤 이야기",
     "ai.similar": "비슷한 작품 추천",
     "ai.taste": "내 취향 분석",
+    "ai.placeholder.title": "준비 중인 기능입니다",
+    "ai.placeholder.body": "향후에는 작품의 배경, 신화·역사적 맥락, 작가의 의도, 관련 작품 등을 설명해드릴 예정입니다.",
 
     // ── Not found / Error ────────────────────────────────────────────────────
     "error.404.heading": "페이지를 찾을 수 없어요",
@@ -211,7 +223,9 @@ export const translations = {
     "common.cancel": "취소",
     "common.confirm": "확인",
     "common.back": "뒤로",
+    "common.close": "닫기",
     "common.loading": "로딩 중...",
+    "common.points": "{n}점",
   },
 
   en: {
@@ -288,6 +302,7 @@ export const translations = {
     "detail.deleteBody": "Delete this record? This cannot be undone.",
     "detail.deleteConfirm": "Delete",
     "detail.deleteError": "Delete failed. Please try again.",
+    "detail.originalImageAlt": "Original image",
 
     // ── Add artwork ──────────────────────────────────────────────────────────
     "add.step.upload": "Photo",
@@ -343,6 +358,9 @@ export const translations = {
     "field.note.placeholder": "What did you feel about this work?",
     "field.tags": "Tags",
     "field.tags.placeholder": "e.g. impressionism, landscape",
+    "field.tags.inputPlaceholder": "Type a tag and press Enter",
+    "field.tags.remove": "Remove {tag}",
+    "field.tags.help": "Press Enter or comma (,) to add · recent tags are suggested automatically",
 
     // ── Search ───────────────────────────────────────────────────────────────
     "search.placeholder": "Search artworks, artists, galleries...",
@@ -384,10 +402,16 @@ export const translations = {
     // ── Export ───────────────────────────────────────────────────────────────
     "export.back": "Archive",
     "export.print": "Save as PDF",
+    "export.generating": "Generating...",
     "export.subtitle": "Personal Archive",
     "export.headline": "My Museum Collection",
     "export.total": "{n} works",
     "export.footer": "Plaque — My Museum",
+    "export.field.year": "Year",
+    "export.field.medium": "Medium",
+    "export.field.location": "Location",
+    "export.field.exhibition": "Exhibition",
+    "export.field.visitDate": "Visited",
 
     // ── Onboarding ───────────────────────────────────────────────────────────
     "onboarding.title": "Welcome to Plaque",
@@ -407,6 +431,8 @@ export const translations = {
     "ai.context": "Story behind this work",
     "ai.similar": "Similar works",
     "ai.taste": "My taste profile",
+    "ai.placeholder.title": "This feature is coming soon",
+    "ai.placeholder.body": "In the future, Plaque will help explain the background, mythological or historical context, artistic intent, and related works.",
 
     // ── Not found / Error ────────────────────────────────────────────────────
     "error.404.heading": "Page not found",
@@ -421,7 +447,9 @@ export const translations = {
     "common.cancel": "Cancel",
     "common.confirm": "Confirm",
     "common.back": "Back",
+    "common.close": "Close",
     "common.loading": "Loading...",
+    "common.points": "{n} stars",
   },
 } as const;
 

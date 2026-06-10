@@ -10,6 +10,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Sparkles } from "lucide-react";
+import { useTranslation } from "@/components/LocaleProvider";
 
 interface AIFeaturePlaceholderProps {
   label: string;
@@ -17,6 +18,7 @@ interface AIFeaturePlaceholderProps {
 
 export function AIFeaturePlaceholder({ label }: AIFeaturePlaceholderProps) {
   const [open, setOpen] = useState(false);
+  const { t } = useTranslation();
 
   return (
     <>
@@ -33,15 +35,14 @@ export function AIFeaturePlaceholder({ label }: AIFeaturePlaceholderProps) {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>준비 중인 기능입니다</DialogTitle>
+            <DialogTitle>{t("ai.placeholder.title")}</DialogTitle>
             <DialogDescription className="text-center leading-relaxed pt-2">
-              향후에는 작품의 배경, 신화·역사적 맥락, 작가의 의도, 관련 작품 등을
-              설명해드릴 예정입니다.
+              {t("ai.placeholder.body")}
             </DialogDescription>
           </DialogHeader>
           <div className="mt-4 flex justify-center">
             <Button variant="outline" onClick={() => setOpen(false)}>
-              확인
+              {t("common.confirm")}
             </Button>
           </div>
         </DialogContent>

@@ -3,13 +3,19 @@ import Image from "next/image";
 import { type ArtworkWithUrls } from "@/lib/types";
 import { StarRating } from "@/components/StarRating";
 import { formatDateShort } from "@/lib/utils";
+import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n";
 
 interface ArtworkCardProps {
   artwork: ArtworkWithUrls;
   priority?: boolean;
+  locale?: Locale;
 }
 
-export function ArtworkCard({ artwork, priority = false }: ArtworkCardProps) {
+export function ArtworkCard({
+  artwork,
+  priority = false,
+  locale = DEFAULT_LOCALE,
+}: ArtworkCardProps) {
   return (
     <Link href={`/scrapbook/${artwork.id}`} className="group block">
       <article className="overflow-hidden rounded-lg border border-border bg-card transition-shadow hover:shadow-md">
@@ -47,7 +53,7 @@ export function ArtworkCard({ artwork, priority = false }: ArtworkCardProps) {
             )}
             {artwork.visit_date && (
               <span className="text-xs text-muted-foreground ml-auto">
-                {formatDateShort(artwork.visit_date)}
+                {formatDateShort(artwork.visit_date, locale)}
               </span>
             )}
           </div>

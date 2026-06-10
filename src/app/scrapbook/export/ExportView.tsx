@@ -6,6 +6,7 @@ import { ArrowLeft, Download, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
 import type { ArtworkWithUrls } from "@/lib/types";
+import { useTranslation } from "@/components/LocaleProvider";
 
 interface ExportViewProps {
   artworks: ArtworkWithUrls[];
@@ -31,9 +32,10 @@ function RatingDots({ value }: { value: number }) {
 }
 
 export function ExportView({ artworks }: ExportViewProps) {
+  const { locale, t } = useTranslation();
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const today = new Date().toLocaleDateString("ko-KR", {
+  const today = new Date().toLocaleDateString(locale === "ko" ? "ko-KR" : "en-US", {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -147,7 +149,7 @@ export function ExportView({ artworks }: ExportViewProps) {
             className="p-2 -ml-2 rounded-full hover:bg-muted transition-colors flex items-center gap-2 text-sm"
           >
             <ArrowLeft className="h-4 w-4" />
-            스크랩북
+            {t("export.back")}
           </Link>
           <Button
             onClick={handleDownloadPDF}
@@ -158,12 +160,12 @@ export function ExportView({ artworks }: ExportViewProps) {
             {isGenerating ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                생성 중...
+                {t("export.generating")}
               </>
             ) : (
               <>
                 <Download className="h-4 w-4" />
-                PDF로 저장
+                {t("export.print")}
               </>
             )}
           </Button>
@@ -194,7 +196,7 @@ export function ExportView({ artworks }: ExportViewProps) {
               fontFamily: "'Helvetica Neue', Arial, sans-serif",
             }}
           >
-            Personal Archive
+            {t("export.subtitle")}
           </p>
           <h1
             style={{
@@ -214,11 +216,11 @@ export function ExportView({ artworks }: ExportViewProps) {
               fontFamily: "'Helvetica Neue', Arial, sans-serif",
             }}
           >
-            나만의 미술관 컬렉션
+            {t("export.headline")}
           </p>
           <div style={{ borderBottom: "2px solid #1a1917", marginBottom: "1.5rem" }} />
           <p style={{ fontSize: "0.875rem", color: "#6b6560", margin: 0 }}>
-            총 {artworks.length}점의 작품 &nbsp;·&nbsp; {today}
+            {t("export.total", { n: artworks.length })} &nbsp;·&nbsp; {today}
           </p>
         </div>
 
@@ -303,13 +305,13 @@ export function ExportView({ artworks }: ExportViewProps) {
               >
                 {(
                   [
-                    ["제작 연도", artwork.year],
-                    ["재료/기법", artwork.medium],
-                    ["장소", artwork.gallery_name],
-                    ["전시", artwork.exhibition_title],
+                    [t("export.field.year"), artwork.year],
+                    [t("export.field.medium"), artwork.medium],
+                    [t("export.field.location"), artwork.gallery_name],
+                    [t("export.field.exhibition"), artwork.exhibition_title],
                     [
-                      "방문일",
-                      artwork.visit_date ? formatDate(artwork.visit_date) : null,
+                      t("export.field.visitDate"),
+                      artwork.visit_date ? formatDate(artwork.visit_date, locale) : null,
                     ],
                   ] as [string, string | null | undefined][]
                 )
@@ -375,7 +377,7 @@ export function ExportView({ artworks }: ExportViewProps) {
             fontFamily: "'Helvetica Neue', Arial, sans-serif",
           }}
         >
-          <span>Plaque — 나만의 미술관</span>
+          <span>{t("export.footer")}</span>
           <span>{today}</span>
         </div>
       </div>

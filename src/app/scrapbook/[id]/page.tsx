@@ -120,7 +120,7 @@ export default async function ArtworkDetailPage({
             {entry.visit_date && (
               <div className="flex gap-4">
                 <dt className="text-sm text-muted-foreground w-20 shrink-0">{t("detail.visitDate", locale)}</dt>
-                <dd className="text-sm">{formatDate(entry.visit_date)}</dd>
+                <dd className="text-sm">{formatDate(entry.visit_date, locale)}</dd>
               </div>
             )}
           </dl>
@@ -157,7 +157,7 @@ export default async function ArtworkDetailPage({
               <div className="mt-3 relative aspect-[4/3] rounded-lg overflow-hidden bg-muted">
                 <Image
                   src={entry.originalUrl}
-                  alt="원본 이미지"
+                  alt={t("detail.originalImageAlt", locale)}
                   fill
                   unoptimized
                   className="object-contain"
