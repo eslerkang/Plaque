@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
   async headers() {
@@ -49,4 +50,17 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  // Org/project/token come from env (Vercel). Without them the build still
+  // succeeds — source-map upload is simply skipped. Runtime is a no-op
+  // unless NEXT_PUBLIC_SENTRY_DSN is set (see sentry.*.config.ts).
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  silent: !process.env.CI,
+  widenClientFileUpload: true,
+  // Route events through the app to dodge ad blockers; proxy.ts matcher
+  // excludes this path.
+  tunnelRoute: "/sentry-tunnel",
+  disableLogger: true,
+});
