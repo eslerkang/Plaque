@@ -11,7 +11,14 @@ import type { ArtworkMetadata } from "@/lib/artwork-metadata";
 
 interface ArtworkMetadataFieldsProps {
   value: ArtworkMetadata;
-  onChange: (next: ArtworkMetadata) => void;
+  /**
+   * State setter for the metadata object. Must accept a functional updater
+   * (i.e. pass `setForm` from `useState` directly). The component ALWAYS
+   * updates functionally — spreading the `value` prop here would capture a
+   * stale snapshot and drop changes when multiple fields fire before the
+   * next render (caught by E2E spec 11 / the rapid-succession unit test).
+   */
+  onChange: React.Dispatch<React.SetStateAction<ArtworkMetadata>>;
   /** Tag suggestions (the user's previously used tags). */
   existingTags?: string[];
   /** Show example placeholders (add flow). Edit flow keeps fields bare. */
@@ -40,7 +47,8 @@ export function ArtworkMetadataFields({
     key: K,
     fieldValue: ArtworkMetadata[K]
   ) {
-    onChange({ ...value, [key]: fieldValue });
+    // Functional update — never spread the render-time `value` prop.
+    onChange((prev) => ({ ...prev, [key]: fieldValue }));
   }
 
   return (
