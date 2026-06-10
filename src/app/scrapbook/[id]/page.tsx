@@ -65,7 +65,10 @@ export default async function ArtworkDetailPage({
             alt={entry.title}
             fill
             className="object-contain"
-            priority
+            preload
+            loading="eager"
+            fetchPriority="high"
+            sizes="(max-width: 640px) 100vw, 512px"
             unoptimized
           />
         </div>

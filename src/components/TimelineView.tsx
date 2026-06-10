@@ -50,7 +50,13 @@ function groupByVisit(artworks: ArtworkWithUrls[]): VisitGroup[] {
   });
 }
 
-function ArtworkRow({ artwork }: { artwork: ArtworkWithUrls }) {
+function ArtworkRow({
+  artwork,
+  priority = false,
+}: {
+  artwork: ArtworkWithUrls;
+  priority?: boolean;
+}) {
   return (
     <Link
       href={`/scrapbook/${artwork.id}`}
@@ -61,6 +67,10 @@ function ArtworkRow({ artwork }: { artwork: ArtworkWithUrls }) {
           src={artwork.displayUrl}
           alt={artwork.title}
           fill
+          preload={priority}
+          loading={priority ? "eager" : undefined}
+          fetchPriority={priority ? "high" : "auto"}
+          sizes="56px"
           unoptimized
           className="object-cover"
         />
@@ -94,7 +104,7 @@ export function TimelineView({
 
   return (
     <div className="space-y-6">
-      {groups.map((group) => (
+      {groups.map((group, groupIndex) => (
         <div key={group.key} className="relative pl-5">
           {/* Timeline dot + line */}
           <div className="absolute left-0 top-2 w-2.5 h-2.5 rounded-full bg-accent border-2 border-background ring-1 ring-accent" />
@@ -127,8 +137,12 @@ export function TimelineView({
 
           {/* Artwork rows */}
           <div className="rounded-xl border border-border bg-card px-3">
-            {group.artworks.map((artwork) => (
-              <ArtworkRow key={artwork.id} artwork={artwork} />
+            {group.artworks.map((artwork, artworkIndex) => (
+              <ArtworkRow
+                key={artwork.id}
+                artwork={artwork}
+                priority={groupIndex === 0 && artworkIndex === 0}
+              />
             ))}
           </div>
         </div>

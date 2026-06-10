@@ -114,8 +114,12 @@ export default async function ScrapbookPage({
 
             {viewMode === "grid" ? (
               <div className="grid grid-cols-2 gap-3">
-                {list.map((artwork) => (
-                  <ArtworkCard key={artwork.id} artwork={artwork} />
+                {list.map((artwork, index) => (
+                  <ArtworkCard
+                    key={artwork.id}
+                    artwork={artwork}
+                    priority={index < 2}
+                  />
                 ))}
               </div>
             ) : (

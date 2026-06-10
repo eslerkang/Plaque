@@ -195,8 +195,12 @@ export function SearchClient({ artworks }: SearchClientProps) {
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3">
-            {results.map((artwork) => (
-              <ArtworkCard key={artwork.id} artwork={artwork} />
+            {results.map((artwork, index) => (
+              <ArtworkCard
+                key={artwork.id}
+                artwork={artwork}
+                priority={index < 2}
+              />
             ))}
           </div>
         )}

@@ -110,6 +110,10 @@ export function EditArtworkClient({ artwork, existingTags = [] }: EditArtworkCli
                 alt={artwork.title}
                 fill
                 className="object-contain"
+                preload
+                loading="eager"
+                fetchPriority="high"
+                sizes="(max-width: 640px) calc(100vw - 2rem), 512px"
                 unoptimized
               />
             </div>

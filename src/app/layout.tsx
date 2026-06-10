@@ -7,6 +7,17 @@ import { LocaleProvider } from "@/components/LocaleProvider";
 import { getLocale } from "@/lib/i18n/server";
 import { t } from "@/lib/i18n";
 
+function getSupabaseOrigin() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!url) return null;
+
+  try {
+    return new URL(url).origin;
+  } catch {
+    return null;
+  }
+}
+
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
   const ogImage = locale === "en" ? "/og-image-en.png" : "/og-image.png";
@@ -67,8 +78,18 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const locale = await getLocale();
+  const supabaseOrigin = getSupabaseOrigin();
+
   return (
     <html lang={locale} className="h-full">
+      <head>
+        {supabaseOrigin && (
+          <>
+            <link rel="preconnect" href={supabaseOrigin} crossOrigin="anonymous" />
+            <link rel="dns-prefetch" href={supabaseOrigin} />
+          </>
+        )}
+      </head>
       <body className="h-full bg-background text-foreground antialiased font-sans">
         <ServiceWorkerRegistration />
         <LocaleProvider locale={locale}>

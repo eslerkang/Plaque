@@ -6,9 +6,10 @@ import { formatDateShort } from "@/lib/utils";
 
 interface ArtworkCardProps {
   artwork: ArtworkWithUrls;
+  priority?: boolean;
 }
 
-export function ArtworkCard({ artwork }: ArtworkCardProps) {
+export function ArtworkCard({ artwork, priority = false }: ArtworkCardProps) {
   return (
     <Link href={`/scrapbook/${artwork.id}`} className="group block">
       <article className="overflow-hidden rounded-lg border border-border bg-card transition-shadow hover:shadow-md">
@@ -18,6 +19,10 @@ export function ArtworkCard({ artwork }: ArtworkCardProps) {
             src={artwork.displayUrl}
             alt={artwork.title}
             fill
+            preload={priority}
+            loading={priority ? "eager" : undefined}
+            fetchPriority={priority ? "high" : "auto"}
+            sizes="(max-width: 640px) 50vw, 240px"
             unoptimized
             className="object-cover transition-transform duration-300 group-hover:scale-105"
           />
