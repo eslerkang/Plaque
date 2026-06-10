@@ -48,9 +48,12 @@ export function SearchClient({ artworks }: SearchClientProps) {
       return true;
     });
 
-    // Sort by relevance when there's an active query
+    // Sort by relevance when there's an active query.
+    // Scores are precomputed once per artwork — the comparator runs
+    // O(n log n) times and scoreArtwork() re-scans every text field.
     if (q) {
-      filtered.sort((a, b) => scoreArtwork(b, q) - scoreArtwork(a, q));
+      const scores = new Map(filtered.map((a) => [a.id, scoreArtwork(a, q)]));
+      filtered.sort((a, b) => (scores.get(b.id) ?? 0) - (scores.get(a.id) ?? 0));
     }
 
     return filtered;
