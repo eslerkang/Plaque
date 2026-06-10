@@ -17,6 +17,7 @@ export default async function ExportPage() {
 
   const rawList = (artworks ?? []) as ArtworkEntry[];
   const artworksWithUrls = await withSignedUrls(rawList, supabase);
+  const exportDate = new Date().toISOString().split("T")[0];
 
-  return <ExportView artworks={artworksWithUrls} />;
+  return <ExportView artworks={artworksWithUrls} exportDate={exportDate} />;
 }

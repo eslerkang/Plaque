@@ -58,6 +58,10 @@ export function SearchClient({ artworks }: SearchClientProps) {
 
   const hasFilters = filters.query || filters.rating || filters.tag;
 
+  function updateQuery(value: string) {
+    setFilters((f) => ({ ...f, query: value }));
+  }
+
   function clearFilters() {
     setFilters({ query: "", rating: null, tag: "" });
   }
@@ -73,9 +77,8 @@ export function SearchClient({ artworks }: SearchClientProps) {
               <Input
                 placeholder={t("search.placeholder")}
                 value={filters.query}
-                onChange={(e) =>
-                  setFilters((f) => ({ ...f, query: e.target.value }))
-                }
+                onChange={(e) => updateQuery(e.currentTarget.value)}
+                onInput={(e) => updateQuery(e.currentTarget.value)}
                 className="pl-9"
                 autoComplete="off"
               />
@@ -164,7 +167,7 @@ export function SearchClient({ artworks }: SearchClientProps) {
       <main className="flex-1 px-4 py-4 max-w-lg mx-auto w-full">
         {/* Results summary */}
         <div className="flex items-center justify-between mb-4">
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground" aria-live="polite">
             {hasFilters
               ? t("search.results", { n: results.length })
               : t("search.total", { n: artworks.length })}

@@ -10,6 +10,7 @@ import { useTranslation } from "@/components/LocaleProvider";
 
 interface ExportViewProps {
   artworks: ArtworkWithUrls[];
+  exportDate: string;
 }
 
 function RatingDots({ value }: { value: number }) {
@@ -31,15 +32,11 @@ function RatingDots({ value }: { value: number }) {
   );
 }
 
-export function ExportView({ artworks }: ExportViewProps) {
+export function ExportView({ artworks, exportDate }: ExportViewProps) {
   const { locale, t } = useTranslation();
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const today = new Date().toLocaleDateString(locale === "ko" ? "ko-KR" : "en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+  const today = formatDate(exportDate, locale);
 
   async function handleDownloadPDF() {
     setIsGenerating(true);
@@ -128,7 +125,7 @@ export function ExportView({ artworks }: ExportViewProps) {
         remainingMm -= sliceMm;
       }
 
-      const filename = `plaque-collection-${new Date().toISOString().split("T")[0]}.pdf`;
+      const filename = `plaque-collection-${exportDate}.pdf`;
       pdf.save(filename);
     } catch (err) {
       console.error("PDF generation failed:", err);
