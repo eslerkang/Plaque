@@ -35,7 +35,7 @@ export default function TermsPage() {
             <div>
               <h3 className="font-semibold mb-1">제1조 (목적)</h3>
               <p>
-                본 약관은 {COMPANY}(이하 "서비스")가 제공하는 개인 미술 아카이브 서비스의
+                본 약관은 {COMPANY}(이하 &quot;서비스&quot;)가 제공하는 개인 미술 아카이브 서비스의
                 이용 조건 및 절차, 기타 필요한 사항을 규정함을 목적으로 합니다.
               </p>
             </div>
@@ -89,7 +89,7 @@ export default function TermsPage() {
             <div>
               <h3 className="font-semibold mb-1">제6조 (면책 조항)</h3>
               <p>
-                본 서비스는 "있는 그대로(as-is)" 제공됩니다. {COMPANY}는 서비스 이용으로 인한
+                본 서비스는 &quot;있는 그대로(as-is)&quot; 제공됩니다. {COMPANY}는 서비스 이용으로 인한
                 데이터 손실, 이미지 손실에 대해 법적으로 허용되는 한도 내에서 책임을 제한합니다.
                 중요한 데이터는 별도로 백업하시기 바랍니다.
               </p>
@@ -174,7 +174,7 @@ export default function TermsPage() {
             <div>
               <h3 className="font-semibold mb-1">6. Disclaimer</h3>
               <p>
-                The service is provided "as is". To the extent permitted by law, {COMPANY}{" "}
+                The service is provided &quot;as is&quot;. To the extent permitted by law, {COMPANY}{" "}
                 limits its liability for data loss or service interruptions. Please back up
                 any data you consider important.
               </p>

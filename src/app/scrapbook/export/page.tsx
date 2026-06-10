@@ -1,19 +1,12 @@
-import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
 import { ExportView } from "./ExportView";
 import { withSignedUrls } from "@/lib/supabase/storage";
 import type { ArtworkEntry } from "@/lib/types";
+import { requireUserWithConsent } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function ExportPage() {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) redirect("/login");
+  const { supabase, user } = await requireUserWithConsent();
 
   const { data: artworks } = await supabase
     .from("artwork_entries")

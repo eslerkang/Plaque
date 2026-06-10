@@ -1,18 +1,11 @@
-import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { SearchClient } from "./SearchClient";
 import { withSignedUrls } from "@/lib/supabase/storage";
 import type { ArtworkEntry } from "@/lib/types";
+import { requireUserWithConsent } from "@/lib/auth";
 
 export default async function SearchPage() {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) redirect("/login");
+  const { supabase, user } = await requireUserWithConsent();
 
   const { data: artworks } = await supabase
     .from("artwork_entries")

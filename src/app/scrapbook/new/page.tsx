@@ -1,14 +1,8 @@
-import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
 import { AddArtworkClient } from "./AddArtworkClient";
+import { requireUserWithConsent } from "@/lib/auth";
 
 export default async function NewArtworkPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) redirect("/login");
+  const { supabase, user } = await requireUserWithConsent();
 
   // Fetch existing tags for autocomplete
   const { data: artworks } = await supabase

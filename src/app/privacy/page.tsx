@@ -162,7 +162,7 @@ export default function PrivacyPage() {
               <p>
                 Data is stored encrypted on Supabase servers (US-based). Images are kept
                 in a private storage bucket accessible only by you. Row-Level Security (RLS)
-                prevents any user from accessing another user's data.
+                prevents any user from accessing another user&apos;s data.
               </p>
             </div>
 

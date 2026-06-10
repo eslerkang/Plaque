@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { Nanum_Myeongjo, Noto_Sans_KR } from "next/font/google";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -7,34 +6,6 @@ import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistratio
 import { LocaleProvider } from "@/components/LocaleProvider";
 import { getLocale } from "@/lib/i18n/server";
 import { t } from "@/lib/i18n";
-
-/**
- * Display / heading font — 나눔명조 (Nanum Myeongjo)
- * License: SIL OFL 1.1 (commercial use permitted)
- * Designed by Naver Corp. — traditional Korean Myeongjo,
- * ideal for museum catalog / gallery label aesthetics.
- */
-const nanumMyeongjo = Nanum_Myeongjo({
-  weight: ["400", "700", "800"],
-  subsets: ["latin"],
-  variable: "--font-serif",
-  display: "swap",
-  preload: false, // Korean fonts are large; avoid blocking preload
-});
-
-/**
- * Body / UI font — Noto Sans KR
- * License: SIL OFL 1.1 (commercial use permitted)
- * Designed by Google / Adobe — comprehensive Korean + Latin support,
- * optimised for screen legibility.
- */
-const notoSansKR = Noto_Sans_KR({
-  weight: ["400", "500", "700"],
-  subsets: ["latin"],
-  variable: "--font-sans",
-  display: "swap",
-  preload: false,
-});
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
@@ -97,7 +68,7 @@ export default async function RootLayout({
 }>) {
   const locale = await getLocale();
   return (
-    <html lang={locale} className={`h-full ${nanumMyeongjo.variable} ${notoSansKR.variable}`}>
+    <html lang={locale} className="h-full">
       <body className="h-full bg-background text-foreground antialiased font-sans">
         <ServiceWorkerRegistration />
         <LocaleProvider locale={locale}>

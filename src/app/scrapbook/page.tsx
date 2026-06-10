@@ -1,5 +1,3 @@
-import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ArtworkCard } from "@/components/ArtworkCard";
 import { Button } from "@/components/ui/button";
@@ -13,6 +11,7 @@ import { withSignedUrls } from "@/lib/supabase/storage";
 import type { ArtworkEntry } from "@/lib/types";
 import { getLocale } from "@/lib/i18n/server";
 import { t } from "@/lib/i18n";
+import { requireUserWithConsent } from "@/lib/auth";
 
 type SortKey = "created_at" | "visit_date" | "rating";
 type ViewMode = "grid" | "timeline";
@@ -26,15 +25,9 @@ export default async function ScrapbookPage({
 }: {
   searchParams: Promise<{ sort?: string; view?: string }>;
 }) {
-  const supabase = await createClient();
+  const { supabase, user } = await requireUserWithConsent();
   const params = await searchParams;
   const locale = await getLocale();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) redirect("/login");
 
   const sortKey: SortKey = isValidSort(params.sort) ? params.sort : "created_at";
   const viewMode: ViewMode = params.view === "timeline" ? "timeline" : "grid";

@@ -1,5 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
-import { redirect, notFound } from "next/navigation";
+import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { encodeTag, formatDate } from "@/lib/utils";
@@ -13,20 +12,16 @@ import { withSignedUrls } from "@/lib/supabase/storage";
 import type { ArtworkEntry } from "@/lib/types";
 import { getLocale } from "@/lib/i18n/server";
 import { t } from "@/lib/i18n";
+import { requireUserWithConsent } from "@/lib/auth";
+
 export default async function ArtworkDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const supabase = await createClient();
+  const { supabase, user } = await requireUserWithConsent();
   const locale = await getLocale();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) redirect("/login");
 
   const { data: artwork, error } = await supabase
     .from("artwork_entries")

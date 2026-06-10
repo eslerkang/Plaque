@@ -33,7 +33,8 @@ export function OnboardingOverlay() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (!localStorage.getItem(STORAGE_KEY)) {
-      setVisible(true);
+      const id = window.setTimeout(() => setVisible(true), 0);
+      return () => window.clearTimeout(id);
     }
   }, []);
 

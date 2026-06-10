@@ -1,19 +1,12 @@
-import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
 import { SettingsClient } from "./SettingsClient";
 import type { Profile } from "@/lib/types";
 import { getLocale } from "@/lib/i18n/server";
 import { t } from "@/lib/i18n";
+import { requireUserWithConsent } from "@/lib/auth";
 
 export default async function SettingsPage() {
-  const supabase = await createClient();
+  const { supabase, user } = await requireUserWithConsent();
   const locale = await getLocale();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) redirect("/login");
 
   const [{ data: profile }, { data: artworks }] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).single(),

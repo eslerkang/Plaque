@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -137,7 +137,7 @@ export function TagInput({
           className="flex-1 min-w-20 bg-transparent outline-none placeholder:text-muted-foreground text-sm"
           autoComplete="off"
           autoCorrect="off"
-          autoCapitalize="off"
+          autoCapitalize="none"
           spellCheck={false}
         />
       </div>

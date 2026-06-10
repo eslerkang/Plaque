@@ -16,6 +16,7 @@ STAGED=$(git diff --cached --name-only --diff-filter=ACM 2>/dev/null || true)
 # ── 1. Forbidden file/directory patterns ─────────────────────────────────────
 BLOCKED_PATTERNS=(
   "^CLAUDE\.md$"
+  "^AGENTS\.md$"
   "^DESIGN_GUIDE"
   "DESIGN_SPEC"
   "INTERNAL_"

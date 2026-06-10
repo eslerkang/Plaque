@@ -33,10 +33,13 @@ next-env.d.ts
 # ── Internal — never commit ───────────────────────────────────────────────────
 
 # AI coding assistant instructions
+AGENTS.md
 CLAUDE.md
 
 # Internal design/spec documents
 DESIGN_GUIDE*.html
+DESIGN_BRIEF*.md
+DESIGN_TEAM_PROMPT*.md
 *.design-guide.*
 
 # Database schema, RLS policies, storage config — internal infrastructure

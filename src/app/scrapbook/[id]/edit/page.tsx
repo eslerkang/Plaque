@@ -1,8 +1,8 @@
-import { createClient } from "@/lib/supabase/server";
-import { redirect, notFound } from "next/navigation";
+import { notFound } from "next/navigation";
 import { EditArtworkClient } from "./EditArtworkClient";
 import { withSignedUrls } from "@/lib/supabase/storage";
 import type { ArtworkEntry } from "@/lib/types";
+import { requireUserWithConsent } from "@/lib/auth";
 
 export default async function EditArtworkPage({
   params,
@@ -10,13 +10,7 @@ export default async function EditArtworkPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) redirect("/login");
+  const { supabase, user } = await requireUserWithConsent();
 
   const [{ data: artwork, error }, { data: allArtworks }] = await Promise.all([
     supabase
