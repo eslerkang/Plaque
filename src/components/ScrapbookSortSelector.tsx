@@ -1,6 +1,7 @@
 "use client";
 
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "@/components/LocaleProvider";
 
@@ -13,12 +14,11 @@ const SORT_OPTIONS = [
 type SortValue = (typeof SORT_OPTIONS)[number]["value"];
 
 export function ScrapbookSortSelector({ current }: { current: SortValue }) {
-  const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { t } = useTranslation();
 
-  function handleSort(value: SortValue) {
+  function sortHref(value: SortValue) {
     const params = new URLSearchParams(searchParams.toString());
     if (value === "created_at") {
       params.delete("sort");
@@ -26,15 +26,15 @@ export function ScrapbookSortSelector({ current }: { current: SortValue }) {
       params.set("sort", value);
     }
     const qs = params.toString();
-    router.push(`${pathname}${qs ? `?${qs}` : ""}`);
+    return `${pathname}${qs ? `?${qs}` : ""}`;
   }
 
   return (
     <div className="flex gap-1">
       {SORT_OPTIONS.map(({ value, labelKey }) => (
-        <button
+        <Link
           key={value}
-          onClick={() => handleSort(value)}
+          href={sortHref(value)}
           className={cn(
             "px-2.5 py-1 rounded-full text-xs font-medium border transition-colors",
             current === value
@@ -43,7 +43,7 @@ export function ScrapbookSortSelector({ current }: { current: SortValue }) {
           )}
         >
           {t(labelKey)}
-        </button>
+        </Link>
       ))}
     </div>
   );
